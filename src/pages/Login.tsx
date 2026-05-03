@@ -40,21 +40,21 @@ export const Login: React.FC = () => {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      navigate("/guards");
     }
   }, [isAuthenticated, navigate]);
 
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
 
+
     try {
       const result = await dispatch(loginAsync(data));
-
       if (loginAsync.fulfilled.match(result)) {
         setShowSuccess(true);
         // Show success animation before redirecting
         setTimeout(() => {
-          navigate("/dashboard");
+          navigate("/guards");
         }, 1000);
       } else {
         setIsSubmitting(false);

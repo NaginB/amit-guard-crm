@@ -33,7 +33,7 @@ const GuardCard: React.FC<{
 }> = ({ guard, onClick, onEdit, onDelete }) => {
   const guardStatus =
     new Date(guard.joiningDate) >
-    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       ? "active"
       : "inactive";
 
@@ -72,11 +72,10 @@ const GuardCard: React.FC<{
                   </h3>
                 </div>
                 <span
-                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
-                    guardStatus === "active"
+                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${guardStatus === "active"
                       ? "bg-green-100 text-green-800 border-green-200"
                       : "bg-red-100 text-red-800 border-red-200"
-                  }`}
+                    }`}
                 >
                   {guardStatus === "active" ? (
                     <Shield className="h-3 w-3 mr-1" />
@@ -224,7 +223,7 @@ export const GuardManagement: React.FC = () => {
       // For now, we'll use a simple status based on joining date
       const guardStatus =
         new Date(guard.joiningDate) >
-        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+          new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
           ? "active"
           : "inactive";
       const matchesStatus =
@@ -353,9 +352,8 @@ export const GuardManagement: React.FC = () => {
                     {count}
                   </p>
                   <p
-                    className={`text-xs sm:text-sm ${
-                      changeColor[statusInfo.changeType]
-                    } truncate`}
+                    className={`text-xs sm:text-sm ${changeColor[statusInfo.changeType]
+                      } truncate`}
                   >
                     {statusInfo.change}
                   </p>
@@ -457,22 +455,20 @@ export const GuardManagement: React.FC = () => {
               <div className="flex items-center bg-gray-100 rounded-lg p-1">
                 <button
                   onClick={() => setViewMode("table")}
-                  className={`px-3 py-2 rounded-md transition-all duration-200 ${
-                    viewMode === "table"
+                  className={`px-3 py-2 rounded-md transition-all duration-200 ${viewMode === "table"
                       ? "bg-white text-blue-600 shadow-sm"
                       : "text-gray-500 hover:text-gray-700"
-                  }`}
+                    }`}
                   title="Table View"
                 >
                   <List className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("cards")}
-                  className={`px-3 py-2 rounded-md transition-all duration-200 ${
-                    viewMode === "cards"
+                  className={`px-3 py-2 rounded-md transition-all duration-200 ${viewMode === "cards"
                       ? "bg-white text-blue-600 shadow-sm"
                       : "text-gray-500 hover:text-gray-700"
-                  }`}
+                    }`}
                   title="Card View"
                 >
                   <Grid3X3 className="h-4 w-4" />
@@ -649,7 +645,7 @@ export const GuardManagement: React.FC = () => {
                         </td>
                         <td className="py-4 px-4 text-gray-900">
                           {guard.salary
-                            ? `$${guard.salary.toLocaleString()}`
+                            ? `₹${guard.salary.toLocaleString()}`
                             : "Not set"}
                         </td>
                         <td className="py-4 px-4">
