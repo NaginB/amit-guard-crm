@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar, Sidebar } from "../common";
 import { logout } from "../../features/auth/authSlice";
-import type { AppDispatch, RootState } from "../../app/store";
+import type { AppDispatch, } from "../../app/store";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -15,10 +15,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useSelector((state: RootState) => state.auth);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeSidebarItem, setActiveSidebarItem] = useState("dashboard");
+
 
   // Update active sidebar item based on current location
   useEffect(() => {
@@ -42,6 +42,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       path.startsWith("/salary-slip")
     ) {
       setActiveSidebarItem("payroll");
+    } else if (path.startsWith("/quick-bills")) {
+      setActiveSidebarItem("quick-bills");
     }
   }, [location.pathname]);
 
@@ -69,6 +71,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       navigate("/billing");
     } else if (itemId === "payroll") {
       navigate("/payroll");
+    } else if (itemId === "quick-bills") {
+      navigate("/quick-bills");
     }
   };
 
@@ -94,7 +98,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
         <div className="flex-1 flex flex-col min-w-0">
           <Navbar
-            user={user || undefined}
             onLogout={handleLogout}
             onMobileMenuToggle={toggleMobileSidebar}
           />

@@ -3,13 +3,11 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   Download,
-  FileText,
   Calendar,
   MapPin,
   User,
   DollarSign,
   CheckCircle,
-  X,
 } from "lucide-react";
 import { Card, Button } from "../components/common";
 import apiService from "../services/api";

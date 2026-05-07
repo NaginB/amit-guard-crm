@@ -1,21 +1,20 @@
 import React from "react";
-import { Bell, Search, User, Menu } from "lucide-react";
+import { Search, User, Menu } from "lucide-react";
 import { Button } from "./Button";
+import CompanyTitle from "./CompanyTitle";
+import { useSelector } from "react-redux";
+import { RootState } from "../../app/store";
 
 interface NavbarProps {
-  user?: {
-    name: string;
-    email: string;
-  };
   onLogout?: () => void;
   onMobileMenuToggle?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
-  user,
   onLogout,
   onMobileMenuToggle,
 }) => {
+  const { user } = useSelector((state: RootState) => state.auth);
   return (
     <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
       <div className="flex items-center justify-between">
@@ -36,12 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="h-8 w-8 rounded-lg object-contain"
             />
             <div>
-              <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
-                Guard CRM
-              </h1>
-              <p className="text-xs text-gray-500 hidden sm:block">
-                Security Management System
-              </p>
+              <CompanyTitle />
             </div>
           </div>
         </div>
@@ -73,8 +67,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
               {/* User details - Hidden on small screens */}
               <div className="hidden sm:block">
-                <p className="text-sm font-medium text-gray-900">
-                  {user?.name || "Admin"}
+                <p className="text-sm font-medium text-gray-900 capitalize">
+                  {user?.role || "Admin"}
                 </p>
                 <p className="text-xs text-gray-500">
                   {user?.email || "admin@guardcrm.com"}

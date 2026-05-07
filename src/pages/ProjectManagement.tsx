@@ -16,7 +16,6 @@ import {
   ChevronRight,
   Eye,
   FileText,
-  X,
 } from "lucide-react";
 import {
   Card,

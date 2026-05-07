@@ -7,9 +7,10 @@ import {
 } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
-import { useSelector } from "react-redux";
-import type { RootState } from "./app/store";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "./app/store";
 import { routes } from "./route.config";
+import { fetchCurrentUser } from "./features/auth/authSlice";
 import { DashboardLayout } from "./components/layouts/DashboardLayout";
 import { GuardLayout } from "./components/layouts/GuardLayout";
 
@@ -38,6 +39,15 @@ const GuardProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 };
 
 const AppRoutes: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  React.useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      dispatch(fetchCurrentUser());
+    }
+  }, [dispatch]);
+
   return (
     <Routes>
       {routes.map((route) => {

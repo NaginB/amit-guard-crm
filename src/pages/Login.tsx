@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loginAsync } from "../features/auth/authSlice";
+import { loginAsync, fetchCurrentUser } from "../features/auth/authSlice";
 import type { AppDispatch, RootState } from "../app/store";
 import {
   CheckCircle,
@@ -51,6 +51,8 @@ export const Login: React.FC = () => {
     try {
       const result = await dispatch(loginAsync(data));
       if (loginAsync.fulfilled.match(result)) {
+        // Fetch fresh user data from the server to clear any stale info
+        await dispatch(fetchCurrentUser());
         setShowSuccess(true);
         // Show success animation before redirecting
         setTimeout(() => {

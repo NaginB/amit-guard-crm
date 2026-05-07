@@ -70,11 +70,26 @@ class ApiService {
     return this.request<{
       status: string;
       message: string;
-      data: { token: string };
+      data: { token: string; role?: string };
     }>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
+  }
+
+  async getMe() {
+    return this.request<{
+      status: string;
+      message: string;
+      data: {
+        user: {
+          id: string;
+          name: string;
+          email: string;
+          role: string;
+        };
+      };
+    }>("/auth/me");
   }
 
   async guardLogin(contactNumber: string, password: string) {
@@ -589,6 +604,35 @@ class ApiService {
     return this.request<any>(`/bills/${billId}/send-email`, {
       method: "POST",
       body: JSON.stringify({ recipientEmail, message }),
+    });
+  }
+
+  // Quick Bill endpoints
+  async getQuickBills(): Promise<any> {
+    return this.request<any>("/quick-bills");
+  }
+
+  async getQuickBill(id: string): Promise<any> {
+    return this.request<any>(`/quick-bills/${id}`);
+  }
+
+  async createQuickBill(data: { address: string; amountPerDay: number; totalDays: number }): Promise<any> {
+    return this.request<any>("/quick-bills", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateQuickBill(id: string, data: any): Promise<any> {
+    return this.request<any>(`/quick-bills/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteQuickBill(id: string): Promise<any> {
+    return this.request<any>(`/quick-bills/${id}`, {
+      method: "DELETE",
     });
   }
 }

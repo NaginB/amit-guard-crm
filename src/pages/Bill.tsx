@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Download,
@@ -10,7 +10,6 @@ import {
   Building2,
   DollarSign,
   Send,
-  X,
 } from "lucide-react";
 import { Card, Button, Modal } from "../components/common";
 import apiService from "../services/api";
@@ -174,7 +173,7 @@ export const Bill: React.FC = () => {
       await apiService.sendBillEmail(billId, emailAddress, emailMessage);
       toast.success("Bill sent via email successfully");
       setShowEmailModal(false);
-      
+
       // Reload bill to update status
       const response = await apiService.getBill(billId);
       if (response.status === "success") {

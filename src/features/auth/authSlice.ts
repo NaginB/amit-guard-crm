@@ -6,6 +6,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  role?: string;
 }
 
 interface AuthState {
@@ -29,10 +30,11 @@ const getInitialAuthState = (): AuthState => {
     isAuthenticated,
     user: isAuthenticated
       ? {
-          id: "1",
-          name: "Admin User",
-          email: "admin@gmail.com", // This could be retrieved from token or separate API call
-        }
+        id: "1",
+        name: "Admin User",
+        email: "admin@gmail.com",
+        role: localStorage.getItem("role") || "admin",
+      }
       : null,
     loading: false,
     error: null,
@@ -51,20 +53,33 @@ export const loginAsync = createAsyncThunk(
         credentials.password
       );
 
-      // Store token in localStorage - the token is nested in the data object
+      // Store token and role in localStorage
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("role", response.data.role || "admin");
 
-      // For now, we'll create a mock user object since the API doesn't return user data
-      // In a real app, you'd typically get user data from a separate endpoint or include it in the login response
       const user: User = {
         id: "1",
-        name: "Admin User",
+        name: response.data.role === "admin" ? "Admin User" : "Employee User",
         email: credentials.email,
+        role: response.data.role,
       };
 
       return user;
     } catch (error: any) {
       return rejectWithValue(error.message || "Login failed");
+    }
+  }
+);
+
+// Async thunk to fetch current user
+export const fetchCurrentUser = createAsyncThunk(
+  "auth/fetchCurrentUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await apiService.getMe();
+      return response.data.user;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Failed to fetch user");
     }
   }
 );
@@ -93,8 +108,9 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.user = null;
       state.error = null;
-      // Clear token from localStorage
+      // Clear token and role from localStorage
       localStorage.removeItem("token");
+      localStorage.removeItem("role");
     },
     clearError: (state) => {
       state.error = null;
@@ -117,6 +133,26 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.error = action.payload as string;
+      })
+      .addCase(fetchCurrentUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload;
+        // Optionally update role in localStorage if it changed
+        if (action.payload.role) {
+          localStorage.setItem("role", action.payload.role);
+        }
+      })
+      .addCase(fetchCurrentUser.rejected, (state) => {
+        state.loading = false;
+        // If fetching user fails, it might mean the token is invalid
+        state.isAuthenticated = false;
+        state.user = null;
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
       });
   },
 });

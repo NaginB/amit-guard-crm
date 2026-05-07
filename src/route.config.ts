@@ -18,6 +18,7 @@ import { Bill } from "./pages/Bill";
 import { BillGeneration } from "./pages/BillGeneration";
 import { BillingManagement } from "./pages/BillingManagement";
 import { Payroll } from "./pages/Payroll";
+import QuickBillManagement from "./pages/QuickBillManagement";
 
 export interface RouteConfig {
   path: string;
@@ -137,6 +138,12 @@ export const routes: RouteConfig[] = [
   {
     path: "/billing",
     element: BillingManagement,
+    isPrivate: true,
+    dashboard: true,
+  },
+  {
+    path: "/quick-bills",
+    element: QuickBillManagement,
     isPrivate: true,
     dashboard: true,
   },

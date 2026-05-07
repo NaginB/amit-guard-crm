@@ -4,7 +4,7 @@ import jsPDF from "jspdf";
 import toast from "react-hot-toast";
 import { Button } from "../common";
 import type { Guard } from "../../features/guards/guardSlice";
-import { padToThreeDigits } from "../../lib/utils";
+// import { calculateAge } from "../../lib/utils";
 import CompanyTitle from "../common/CompanyTitle";
 import { COMPANY_ADDRESS, COMPANY_EMAIL, COMPANY_PHONE, COMPANY_WEBSITE } from "../../constants/company.constants";
 

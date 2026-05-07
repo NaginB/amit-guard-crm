@@ -4,6 +4,7 @@ import authReducer from "../features/auth/authSlice";
 import guardReducer from "../features/guards/guardSlice";
 import inventoryReducer from "../features/inventories/inventorySlice";
 import siteReducer from "../features/sites/siteSlice";
+import quickBillReducer from "../features/quickBills/quickBillSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     guards: guardReducer,
     inventories: inventoryReducer,
     sites: siteReducer,
+    quickBills: quickBillReducer,
   },
 });
 

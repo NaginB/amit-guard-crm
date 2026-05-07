@@ -4,8 +4,11 @@ import {
   ChevronRight,
   X,
   Shield,
+  FileText,
 } from "lucide-react";
 import classNames from "classnames";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../app/store";
 
 interface SidebarItem {
   id: string;
@@ -23,9 +26,17 @@ interface SidebarProps {
   onMobileClose?: () => void;
 }
 
-const sidebarItems: SidebarItem[] = [
-  { id: "guards", label: "Guard Management", icon: Shield },
-];
+const getSidebarItems = (role?: string): SidebarItem[] => {
+  const items: SidebarItem[] = [
+    { id: "guards", label: "Guard Management", icon: Shield },
+  ];
+
+  if (role === "admin") {
+    items.push({ id: "quick-bills", label: "Quick Bills", icon: FileText }); 
+  }
+
+  return items;
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed = false,
@@ -35,6 +46,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobileOpen = false,
   onMobileClose,
 }) => {
+  const userRole = useSelector((state: RootState) => state.auth.user?.role);
+  const sidebarItems = getSidebarItems(userRole);
+
   return (
     <>
       {/* Mobile Overlay */}

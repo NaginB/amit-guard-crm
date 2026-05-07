@@ -55,8 +55,6 @@ export const BillGeneration: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
-    watch,
   } = useForm<BillGenerationFormData>({
     resolver: yupResolver(billGenerationSchema) as any,
     defaultValues: {

@@ -186,10 +186,10 @@ export const BillingManagement: React.FC = () => {
 
       try {
         const project = projects.find((p) => p._id === selectedProjectId);
-        if (project && project.guardAssignments) {
-          const guards = project.guardAssignments
-            .filter((assignment) => assignment.isActive)
-            .map((assignment) => ({
+        if (project && (project as any).guardAssignments) {
+          const guards = (project as any).guardAssignments
+            .filter((assignment: any) => assignment.isActive)
+            .map((assignment: any) => ({
               value: assignment.guardId,
               label: assignment.guardName || `Guard ${assignment.guardId}`,
             }));
