@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Plus, Download, Trash2, Edit, Eye, X } from "lucide-react";
 import { Card, Button, Input } from "../components/common";
 import ConfirmModal from "../components/common/ConfirmModal";
-import CompanyTitle from "../components/common/CompanyTitle";
 import {
   fetchQuickBills,
   createQuickBill,

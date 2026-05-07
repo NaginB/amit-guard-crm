@@ -79,7 +79,7 @@ const drawFront = async (pdf: jsPDF, guard: Guard, ox: number, oy: number) => {
   p.fill(WHITE);
   p.draw([229, 231, 235]);
   pdf.setLineWidth(0.2);
-  pdf.roundedRect(ox, oy, CW, CH, 2, 2, "FD");
+  pdf.rect(ox, oy, CW, CH, "FD");
 
   // Blue top bar
   p.rect(ox, oy, CW, 1.5, BLUE_RGB);
@@ -113,12 +113,12 @@ const drawFront = async (pdf: jsPDF, guard: Guard, ox: number, oy: number) => {
   p.fill(LIGHT);
   p.draw(RED_RGB);
   pdf.setLineWidth(0.5);
-  pdf.roundedRect(ox + 3, oy + 16, 17, 21, 1, 1, "FD");
+  pdf.roundedRect(ox + 3, oy + 18, 17, 21, 1, 1, "FD");
 
   if (guard.photo) {
     try {
       const photoData = await imgToDataURL(guard.photo);
-      pdf.addImage(photoData, "JPEG", ox + 3.4, oy + 16.4, 16.2, 20.2);
+      pdf.addImage(photoData, "JPEG", ox + 3.4, oy + 18.5, 16.2, 20.2);
     } catch (_) { /* no photo */ }
   }
 
@@ -128,19 +128,20 @@ const drawFront = async (pdf: jsPDF, guard: Guard, ox: number, oy: number) => {
     ["Designation", `${guard.designation || "N/A"}`],
     ["D.O.B", guard.dateOfBirth ? fmtDate(new Date(guard.dateOfBirth)) : "N/A"],
     ["Gender", guard.gender || "N/A"],
+    ["D.O.J", fmtDate(new Date(guard.joiningDate))],
     ["Valid Upto", fmtDate(getValidUntil(guard))],
   ];
 
-  let rowY = oy + 18;
+  let rowY = oy + 19.5;
   rows.forEach(([label, value]) => {
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(5.5);
     p.text(MID);
-    pdf.text(label, ox + 22, rowY);
-    pdf.text(":", ox + 38, rowY);
+    pdf.text(label, ox + 32, rowY);
+    pdf.text(":", ox + 44, rowY);
     pdf.setFont("helvetica", "bold");
     p.text(DARK);
-    pdf.text(value, ox + 40, rowY);
+    pdf.text(value, ox + 46.5, rowY);
     rowY += 4.2;
   });
 
@@ -149,7 +150,7 @@ const drawFront = async (pdf: jsPDF, guard: Guard, ox: number, oy: number) => {
   pdf.setFontSize(5.5);
   p.text(MID);
   pdf.text("For Eagle Eye Security Service", ox + 3, oy + CH - 9);
-  pdf.text("Authorise Signature", ox + 3, oy + CH - 2);
+  pdf.text("Authorised Signatory", ox + 3, oy + CH - 2);
 };
 
 // ─── Draw back card using vector ops ──────────────────────────────────────────
@@ -198,7 +199,7 @@ const drawBack = async (pdf: jsPDF, ox: number, oy: number) => {
     ["Email", COMPANY_EMAIL],
     ["Web", COMPANY_WEBSITE],
   ];
-  let cy = oy + 17;
+  let cy = oy + 18;
   contacts.forEach(([label, text]) => {
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(4.5);
@@ -370,6 +371,7 @@ export const IDCardFront: React.FC<IDCardFrontProps> = ({ guard, cardRef }) => {
     // ["Emp. Code", `${padToThreeDigits(guard.guardId || 0)}`],
     ["D.O.B", guard.dateOfBirth ? fmtDate(new Date(guard.dateOfBirth)) : "N/A"],
     ["Gender", guard.gender || "N/A"],
+    ["D.O.J", fmtDate(new Date(guard.joiningDate))],
     ["Valid Upto", fmtDate(validUntil)],
   ];
 
@@ -397,7 +399,7 @@ export const IDCardFront: React.FC<IDCardFrontProps> = ({ guard, cardRef }) => {
       </div>
       <div className="pl-3 mt-1 flex flex-col gap-[18px]">
         <p className="text-[8px] text-[#374151]">For Eagle Eye Security Service</p>
-        <p className="text-[8px] text-[#374151]">Authorise Signature</p>
+        <p className="text-[8px] text-[#374151]">Authorised Signatory</p>
       </div>
     </div>
   );
@@ -470,16 +472,19 @@ export const GuardIDCardSection: React.FC<GuardIDCardSectionProps> = ({ guard })
     try {
       toast.loading("Generating PDF...", { id: "pdf-download" });
 
-      const totalH = CH * 2 + GAP;
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
+      // Landscape A4: 297mm × 210mm
+      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4", compress: true });
+      const pageW = pdf.internal.pageSize.getWidth(); // 297 
 
-      const x0 = (pageW - CW) / 2;
-      const y0 = (pageH - totalH) / 2;
+      // Place both cards side-by-side at the top with a margin
+      const topMargin = 20;
+      const cardGap = GAP;
+      const totalCardsW = CW * 2 + cardGap;
+      const x0 = (pageW - totalCardsW) / 2; // horizontally centered
+      const y0 = topMargin;                  // near the top
 
       await drawFront(pdf, guard, x0, y0);
-      await drawBack(pdf, x0, y0 + CH + GAP);
+      await drawBack(pdf, x0 + CW + cardGap, y0);
 
       pdf.save(`${guard.firstName}_${guard.lastName}_ID_Card.pdf`);
       toast.success("PDF downloaded!", { id: "pdf-download" });
