@@ -22,6 +22,7 @@ import type { AppDispatch, RootState } from "../app/store";
 import { useDispatch, useSelector } from "react-redux";
 import { GuardIDCardSection } from "../components/guards/GuardIDCard";
 import { GuardPrintProfile } from "../components/guards/GuardPrintProfile";
+import { padToThreeDigits } from "../lib/utils";
 
 // ─── Reusable components ──────────────────────────────────────────────────────
 const InfoRow: React.FC<{ icon: LucideIcon; label: string; value: string }> = ({
@@ -164,7 +165,7 @@ export const GuardDetail: React.FC = () => {
                     <span className="capitalize">{guardStatus}</span>
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 mb-0.5">Security Guard · Guard ID: <span className="font-semibold">EES-{currentGuard.guardId || "N/A"}</span></p>
+                <p className="text-sm text-gray-600 mb-0.5">Security Guard · Guard ID: <span className="font-semibold">{padToThreeDigits(Number(currentGuard.guardId)) || "N/A"}</span></p>
                 <p className="text-sm text-gray-500">{currentGuard.presentAddress || "No address"}</p>
               </div>
             </div>
@@ -224,7 +225,7 @@ export const GuardDetail: React.FC = () => {
         <SectionCard title="Employment Details" cols={3}>
           <InfoRow icon={Calendar} label="Joining Date" value={fmt(currentGuard.joiningDate)} />
           <InfoRow icon={DollarSign} label="Salary" value={currentGuard.salary ? `₹${currentGuard.salary.toLocaleString()}` : "Not set"} />
-          <InfoRow icon={Shield} label="Guard ID" value={`EES-${currentGuard.guardId || "N/A"}`} />
+          <InfoRow icon={Shield} label="Guard ID" value={` ${padToThreeDigits(Number(currentGuard.guardId)) || "N/A"}`} />
         </SectionCard>
 
         {/* KYC & Bank Details */}

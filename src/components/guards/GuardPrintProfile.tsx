@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import type { Guard } from "../../features/guards/guardSlice";
+import { padToThreeDigits } from "../../lib/utils";
 
 // ─── Print styles injected once ──────────────────────────────────────────────
 const PRINT_STYLES = `
@@ -23,10 +24,10 @@ const PRINT_STYLES = `
 const fmt = (d?: string) =>
   d
     ? new Date(d).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
     : "—";
 
 const val = (v?: string | number | null) =>
@@ -97,7 +98,7 @@ export const GuardPrintProfile: React.FC<GuardPrintProfileProps> = ({ guard }) =
           <div style={{ fontSize: "9px", color: "#6b7280", marginTop: "2px" }}>
             Generated: {new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
           </div>
-          <div style={{ fontSize: "9px", color: "#6b7280" }}>Guard ID: EES-{guard.guardId || "N/A"}</div>
+          <div style={{ fontSize: "9px", color: "#6b7280" }}>Guard ID: {padToThreeDigits(Number(guard.guardId)) || "N/A"}</div>
         </div>
       </div>
 
