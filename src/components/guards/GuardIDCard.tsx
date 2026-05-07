@@ -4,6 +4,9 @@ import jsPDF from "jspdf";
 import toast from "react-hot-toast";
 import { Button } from "../common";
 import type { Guard } from "../../features/guards/guardSlice";
+import { padToThreeDigits } from "../../lib/utils";
+import CompanyTitle from "../common/CompanyTitle";
+import { COMPANY_ADDRESS, COMPANY_EMAIL, COMPANY_PHONE, COMPANY_WEBSITE } from "../../constants/company.constants";
 
 // ─── Brand colors ─────────────────────────────────────────────────────────────
 const RED = "#d12525";
@@ -85,7 +88,7 @@ const drawFront = async (pdf: jsPDF, guard: Guard, ox: number, oy: number) => {
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(11);
   p.text(RED_RGB);
-  pdf.text("EAGLEEYE", ox + 3, oy + 7);
+  pdf.text("EAGLE EYE", ox + 3, oy + 7);
 
   pdf.setFontSize(7);
   p.text(BLUE_RGB);
@@ -125,7 +128,6 @@ const drawFront = async (pdf: jsPDF, guard: Guard, ox: number, oy: number) => {
     ["Phone", guard.contactNumber || "N/A"],
     ["Emp. Code", `EES-${guard.guardId || "N/A"}`],
     ["D.O.B", guard.dateOfBirth ? fmtDate(new Date(guard.dateOfBirth)) : "N/A"],
-    ["Joined", fmtDate(new Date(guard.joiningDate))],
     ["Valid Upto", fmtDate(getValidUntil(guard))],
   ];
 
@@ -374,15 +376,15 @@ interface IDCardFrontProps {
 }
 
 export const IDCardFront: React.FC<IDCardFrontProps> = ({ guard, cardRef }) => {
-  const joiningDate = new Date(guard.joiningDate);
+  // const joiningDate = new Date(guard.joiningDate);
   const validUntil = getValidUntil(guard);
 
   const rows: [string, string][] = [
     ["Name", `${guard.firstName} ${guard.lastName}`],
-    ["Phone", guard.contactNumber || "N/A"],
-    ["Emp. Code", `EES-${guard.guardId || "N/A"}`],
+    ["Designation", `${guard.designation || "N/A"}`],
+    // ["Emp. Code", `${padToThreeDigits(guard.guardId || 0)}`],
     ["D.O.B", guard.dateOfBirth ? fmtDate(new Date(guard.dateOfBirth)) : "N/A"],
-    ["Joined", fmtDate(joiningDate)],
+    ["Gender", guard.gender || "N/A"],
     ["Valid Upto", fmtDate(validUntil)],
   ];
 
@@ -390,16 +392,12 @@ export const IDCardFront: React.FC<IDCardFrontProps> = ({ guard, cardRef }) => {
     <div ref={cardRef} style={{ width: "340px", height: "210px", backgroundColor: "#ffffff", borderRadius: "10px", overflow: "hidden", position: "relative", fontFamily: "Arial, sans-serif", boxShadow: "0 4px 16px rgba(0,0,0,0.18)", border: "1px solid #e5e7eb" }}>
       <div style={{ backgroundColor: BLUE, height: "6px", width: "100%" }} />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px 4px" }}>
-        <div>
-          <div style={{ fontSize: "15px", fontWeight: "900", color: RED, letterSpacing: "0.5px", lineHeight: 1 }}>EAGLEEYE</div>
-          <div style={{ fontSize: "10px", fontWeight: "700", color: BLUE, letterSpacing: "2px" }}>SECURITY</div>
-          <div style={{ fontSize: "7px", color: "#6b7280", letterSpacing: "0.5px" }}>SAFETY FIRST · ALWAYS</div>
-        </div>
+        <CompanyTitle />
         <img src="/logo.png" alt="logo" style={{ width: "36px", height: "36px", objectFit: "contain" }} />
       </div>
       <div style={{ height: "1px", backgroundColor: "#e5e7eb", margin: "0 12px" }} />
-      <div style={{ display: "flex", gap: "10px", padding: "8px 12px" }}>
-        <div style={{ width: "72px", height: "90px", border: `2px solid ${RED}`, borderRadius: "5px", overflow: "hidden", flexShrink: 0, backgroundColor: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ display: "flex", gap: "14px", padding: "8px 12px 5px" }}>
+        <div style={{ width: "65px", height: "80px", border: `2px solid ${RED}`, borderRadius: "5px", overflow: "hidden", flexShrink: 0, backgroundColor: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center" }}>
           {guard.photo ? <img src={guard.photo} alt="guard" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <User style={{ width: "32px", height: "32px", color: "#9ca3af" }} />}
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "3px" }}>
@@ -412,9 +410,9 @@ export const IDCardFront: React.FC<IDCardFrontProps> = ({ guard, cardRef }) => {
           ))}
         </div>
       </div>
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: BLUE, padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ fontSize: "9px", color: "#fff", letterSpacing: "0.5px" }}>DESIGNATION : {guard?.designation || 'Not Provided'}</div>
-        {guard.gender && <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.85)", fontWeight: "600" }}>{guard.gender.toUpperCase()}</div>}
+      <div className="pl-3 mt-1 flex flex-col gap-[18px]">
+        <p className="text-[8px] text-[#374151]">For Eagle Eye Security Service</p>
+        <p className="text-[8px] text-[#374151]">Authorize Signature</p>
       </div>
     </div>
   );
@@ -432,23 +430,22 @@ export const IDCardBack: React.FC<IDCardBackProps> = ({ backRef }) => (
     <div style={{ padding: "10px 14px", display: "flex", gap: "10px" }}>
       <div style={{ flex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "5px" }}>
-          <img src="/logo.png" alt="logo" style={{ width: "26px", height: "26px", objectFit: "contain" }} />
-          <div>
-            <div style={{ fontSize: "12px", fontWeight: "900", lineHeight: 1 }}>
-              <span style={{ color: RED }}>EAGLEEYE </span><span style={{ color: BLUE }}>SECURITY</span>
-            </div>
-            <div style={{ fontSize: "6.5px", color: "#6b7280", letterSpacing: "0.5px" }}>SAFETY FIRST · SAFETY ALWAYS</div>
-          </div>
+          <img src="/logo.png" alt="logo" style={{ width: "36px", height: "36px", objectFit: "contain" }} />
+          <CompanyTitle />
         </div>
-        <div style={{ fontSize: "7.5px", fontWeight: "700", color: BLUE, marginBottom: "1px" }}>PREMIUM SECURITY SERVICES</div>
-        <div style={{ fontSize: "7px", color: "#374151", marginBottom: "6px" }}>INDUSTRIAL | COMMERCIAL | RESIDENTIAL</div>
-        <div style={{ height: "1px", backgroundColor: "#e5e7eb", marginBottom: "6px" }} />
-        {([["📍", "H.O. 1207, Satyamev Elite, Bopal-Ambli Junction, Ahmedabad"], ["📞", "1800-309-7890"], ["✉", "info@eagleeye-security.com"], ["🌐", "www.eagleeye-security.com"]] as [string, string][]).map(([icon, text]) => (
-          <div key={text} style={{ display: "flex", alignItems: "flex-start", gap: "4px", marginBottom: "2.5px" }}>
-            <span style={{ fontSize: "7.5px", lineHeight: 1.4 }}>{icon}</span>
-            <span style={{ fontSize: "7.5px", color: "#374151", lineHeight: 1.4 }}>{text}</span>
-          </div>
-        ))}
+        <div style={{ height: "1px", backgroundColor: "#e5e7eb", marginBottom: "10px", }} />
+        {
+          ([["📍", COMPANY_ADDRESS],
+          ["📞", COMPANY_PHONE],
+          ["✉️", COMPANY_EMAIL],
+          ["🌐", COMPANY_WEBSITE]] as [string, string][])
+            .map(([icon, text]) => (
+              <div key={text} style={{ display: "flex", alignItems: "flex-start", gap: "4px", marginBottom: "5px" }}>
+                <span style={{ fontSize: "7.5px", lineHeight: 1.4 }}>{icon}</span>
+                <span style={{ fontSize: "7.5px", color: "#374151", lineHeight: 1.4 }}>{text}</span>
+              </div>
+            ))
+        }
       </div>
       <div style={{ width: "1px", backgroundColor: "#e5e7eb", flexShrink: 0 }} />
       <div style={{ width: "90px", flexShrink: 0 }}>
