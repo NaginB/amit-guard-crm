@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Plus, Download, Trash2, Edit, Eye, X } from "lucide-react";
 import { Card, Button, Input } from "../components/common";
 import ConfirmModal from "../components/common/ConfirmModal";
+import CompanyTitle from "../components/common/CompanyTitle";
 import {
   fetchQuickBills,
   createQuickBill,
@@ -119,104 +120,148 @@ export const QuickBillManagement: React.FC = () => {
     setDeleteTargetId(null);
   };
 
-  const buildPDFDoc = (bill: any) => {
+  const buildPDFDoc = async (bill: any) => {
     const doc = new jsPDF();
+    const RED: [number, number, number] = [209, 37, 37];
+    const BLUE: [number, number, number] = [21, 44, 86];
 
-    // Blue header bar
-    doc.setFillColor(65, 105, 225);
-    doc.rect(0, 10, 210, 15, "F");
+    // ── BLUE header band ──────────────────────────────────
+    doc.setFillColor(...BLUE);
+    doc.rect(0, 0, 210, 32, "F");
 
+    // RED accent stripe
+    doc.setFillColor(...RED);
+    doc.rect(0, 32, 210, 3, "F");
+
+    // Logo image
+    try {
+      const logoRes = await fetch("/logo.png");
+      const logoBlob = await logoRes.blob();
+      const logoB64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(logoBlob);
+      });
+      doc.addImage(logoB64, "PNG", 14, 4, 22, 22);
+    } catch (_) {
+      // logo not available, skip
+    }
+
+    // Company name — shifted right to sit beside logo
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
+    doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.text("Eagle Eye Security", 14, 21);
-
-    doc.setFontSize(16);
-    doc.text("RECEIPT", 170, 21);
-
-    // Company address
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(10);
+    doc.text("EAGLE EYE", 40, 13);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    const companyAddrLines = doc.splitTextToSize(
-      "No. 418, Shivalik Satyamev, SP Ring Rd Junction, Ambli - Bopal Rd Ahmedabad, Gujarat - 380058",
-      60
+    doc.setTextColor(200, 210, 230);
+    doc.text("SECURITY SERVICE", 40, 20);
+    doc.setFontSize(7);
+    doc.text("ALWAYS VIGILANT", 40, 26);
+
+    // RECEIPT label (right side)
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("RECEIPT", 196, 20, { align: "right" });
+
+    // ── Company address ───────────────────────────────────
+    doc.setTextColor(80, 80, 80);
+    doc.setFontSize(8.5);
+    doc.setFont("helvetica", "normal");
+    const addrLines = doc.splitTextToSize(
+      "No. 418, Shivalik Satyamev, SP Ring Rd Junction, Ambli - Bopal Rd, Ahmedabad, Gujarat - 380058",
+      90
     );
-    doc.text(companyAddrLines, 14, 35);
+    doc.text(addrLines, 14, 40);
 
-    // Bill To & Receipt Info
+    // ── Bill To & Receipt meta ────────────────────────────
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...BLUE);
+    doc.text("BILL TO", 14, 58);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(50, 50, 50);
+    const billToLines = doc.splitTextToSize(bill.address, 80);
+    doc.text(billToLines, 14, 63);
+
+    // Receipt # and date (right)
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...BLUE);
+    doc.text("Receipt #", 130, 58);
+    doc.text("Receipt Date", 130, 64);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(50, 50, 50);
+    doc.text(bill.billNumber || "N/A", 196, 58, { align: "right" });
+    doc.text(new Date(bill.createdAt).toLocaleDateString("en-GB"), 196, 64, { align: "right" });
+
+    // ── Table ─────────────────────────────────────────────
+    const startY = 82;
+    // Header bg
+    doc.setFillColor(...BLUE);
+    doc.rect(14, startY, 182, 9, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.text("QTY (Days)", 20, startY + 6);
+    doc.text("DESCRIPTION", 60, startY + 6);
+    doc.text("UNIT PRICE (Per Day)", 130, startY + 6);
+    doc.text("AMOUNT", 196, startY + 6, { align: "right" });
+
+    // Row
+    doc.setFillColor(250, 250, 252);
+    doc.rect(14, startY + 9, 182, 10, "F");
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(40, 40, 40);
+    doc.setFontSize(9);
+    doc.text(bill.totalDays.toString(), 25, startY + 16);
+    doc.text("Security Service", 60, startY + 16);
+    doc.text(`Rs.${bill.amountPerDay.toFixed(2)}`, 130, startY + 16);
+    doc.text(`Rs.${bill.totalAmount.toFixed(2)}`, 196, startY + 16, { align: "right" });
+
+    // Borders
+    doc.setDrawColor(200, 200, 210);
+    doc.rect(14, startY, 182, 19, "S");
+    doc.line(14, startY + 9, 196, startY + 9);
+
+    // ── Totals ────────────────────────────────────────────
+    const finalY = startY + 19 + 8;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
+    doc.text("Subtotal", 150, finalY);
+    doc.text(`Rs.${bill.totalAmount.toFixed(2)}`, 196, finalY, { align: "right" });
+
+    // Total box with RED accent
+    doc.setFillColor(...RED);
+    doc.rect(130, finalY + 4, 66, 10, "F");
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text("TOTAL", 135, finalY + 11);
+    doc.text(`Rs.${bill.totalAmount.toFixed(2)}`, 194, finalY + 11, { align: "right" });
+
+    // ── Terms ─────────────────────────────────────────────
+    doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
-    doc.text("Bill To", 14, 60);
-
+    doc.setTextColor(...BLUE);
+    doc.text("Terms & Conditions", 14, finalY + 28);
     doc.setFont("helvetica", "normal");
-    const billToLines = doc.splitTextToSize(bill.address, 60);
-    doc.text(billToLines, 14, 65);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Payment is due upon receipt.", 14, finalY + 33);
 
-    // Receipt details on the right
-    doc.setFont("helvetica", "bold");
-    doc.text("Receipt #", 140, 60);
-    doc.text("Receipt Date", 140, 65);
-
-    doc.setFont("helvetica", "normal");
-    doc.text(bill.billNumber || "N/A", 170, 60);
-    doc.text(new Date(bill.createdAt).toLocaleDateString("en-GB"), 170, 65);
-
-    // Table Header
-    const startY = 85;
-    doc.setFillColor(240, 240, 240);
-    doc.rect(14, startY, 182, 10, "F");
-
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(0, 0, 0);
-    doc.text("QTY (Days)", 20, startY + 7);
-    doc.text("DESCRIPTION", 60, startY + 7);
-    doc.text("UNIT PRICE (Per Day)", 130, startY + 7);
-    doc.text("AMOUNT", 170, startY + 7);
-
-    // Table Content
-    doc.setFont("helvetica", "normal");
-    doc.text(bill.totalDays.toString(), 25, startY + 17);
-    doc.text("Security Services", 60, startY + 17);
-    doc.text(`₹${bill.amountPerDay.toFixed(2)}`, 130, startY + 17);
-    doc.text(`₹${bill.totalAmount.toFixed(2)}`, 170, startY + 17);
-
-    // Table Borders
-    doc.setDrawColor(220, 220, 220);
-    doc.line(14, startY, 196, startY);
-    doc.line(14, startY + 10, 196, startY + 10);
-    doc.line(14, startY + 22, 196, startY + 22);
-    doc.line(14, startY, 14, startY + 22);
-    doc.line(196, startY, 196, startY + 22);
-
-    // Totals
-    const finalY = startY + 22 + 10;
-
-    doc.setFont("helvetica", "bold");
-    doc.text("Subtotal", 140, finalY);
-    doc.setFont("helvetica", "normal");
-    doc.text(`₹${bill.totalAmount.toFixed(2)}`, 170, finalY, { align: "left" });
-
-    // Total Box
-    doc.setFillColor(245, 245, 245);
-    doc.rect(135, finalY + 5, 60, 10, "F");
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("TOTAL", 140, finalY + 12);
-    doc.text(`₹${bill.totalAmount.toFixed(2)}`, 170, finalY + 12);
-
-    // Terms
-    doc.setFontSize(10);
-    doc.text("Terms & Conditions", 14, finalY + 40);
-    doc.setFont("helvetica", "normal");
-    doc.text("Payment is due upon receipt.", 14, finalY + 45);
+    // ── Footer band ───────────────────────────────────────
+    doc.setFillColor(...BLUE);
+    doc.rect(0, 282, 210, 15, "F");
+    doc.setFontSize(7);
+    doc.setTextColor(180, 190, 210);
+    doc.text("Eagle Eye Security Service — Always Vigilant", 105, 289, { align: "center" });
 
     return doc;
   };
 
-  const downloadPDF = (bill: any) => {
-    const doc = buildPDFDoc(bill);
+  const downloadPDF = async (bill: any) => {
+    const doc = await buildPDFDoc(bill);
     doc.save(`${bill.billNumber || "quick_bill"}.pdf`);
   };
 
@@ -228,8 +273,8 @@ export const QuickBillManagement: React.FC = () => {
     setPreviewBill(null);
   };
 
-  const downloadFromPreview = () => {
-    if (previewBill) downloadPDF(previewBill);
+  const downloadFromPreview = async () => {
+    if (previewBill) await downloadPDF(previewBill);
   };
 
   return (
@@ -349,105 +394,120 @@ export const QuickBillManagement: React.FC = () => {
 
       {/* Bill Preview Modal */}
       {previewBill && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 py-8 px-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl">
-            {/* Preview Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">Bill Preview</h2>
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 py-8 px-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
+
+            {/* Toolbar */}
+            <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-b">
+              <span className="text-sm font-semibold text-gray-700">Bill Preview</span>
               <div className="flex items-center gap-2">
-                <Button onClick={downloadFromPreview} className="flex items-center gap-2 text-sm">
-                  <Download className="h-4 w-4" />
-                  Download PDF
-                </Button>
                 <button
-                  onClick={closePreview}
-                  className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                  onClick={downloadFromPreview}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
+                  style={{ backgroundColor: "#152c56" }}
                 >
-                  <X className="h-5 w-5 text-gray-600" />
+                  <Download className="h-3.5 w-3.5" />
+                  Download PDF
+                </button>
+                <button onClick={closePreview} className="p-1 rounded-lg hover:bg-gray-200 transition-colors">
+                  <X className="h-4 w-4 text-gray-600" />
                 </button>
               </div>
             </div>
 
-            {/* Preview Content */}
-            <div className="p-6 font-sans text-sm">
-              {/* Company Header */}
-              <div className="bg-blue-700 text-white rounded-lg px-6 py-4 flex justify-between items-center mb-6">
-                <div>
-                  <h3 className="text-xl font-bold">Eagle Eye Security</h3>
-                  <p className="text-blue-200 text-xs mt-1">
-                    No. 418, Shivalik Satyamev, SP Ring Rd Junction,<br />
-                    Ambli - Bopal Rd, Ahmedabad, Gujarat - 380058
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="text-lg font-bold tracking-widest">RECEIPT</span>
-                </div>
-              </div>
+            {/* ── PDF-mirror body ── */}
+            <div className="font-sans text-sm">
 
-              {/* Bill Meta */}
-              <div className="grid grid-cols-2 gap-6 mb-6">
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Bill To</p>
-                  <p className="text-gray-800 whitespace-pre-line">{previewBill.address}</p>
-                </div>
-                <div className="text-right space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Receipt #</span>
-                    <span className="font-medium text-gray-900">{previewBill.billNumber || "N/A"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Date</span>
-                    <span className="font-medium text-gray-900">
-                      {new Date(previewBill.createdAt).toLocaleDateString("en-GB")}
-                    </span>
+              {/* Header band — matches PDF BLUE rect */}
+              <div style={{ backgroundColor: "#152c56", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <img src="/logo.png" alt="Logo" style={{ height: "48px", width: "48px", objectFit: "contain", backgroundColor: "white", borderRadius: "8px", padding: "4px" }} />
+                  <div>
+                    <div style={{ fontSize: "20px", fontWeight: 900, color: "white", letterSpacing: "0.5px", lineHeight: 1 }}>EAGLE EYE</div>
+                    <div style={{ fontSize: "10px", fontWeight: 700, color: "#c8d2e6", letterSpacing: "2px" }}>SECURITY SERVICE</div>
+                    <div style={{ fontSize: "7px", color: "rgba(200,210,230,0.7)", letterSpacing: "0.5px" }}>ALWAYS VIGILANT</div>
                   </div>
                 </div>
+                <div style={{ fontSize: "18px", fontWeight: 900, color: "white", letterSpacing: "4px" }}>RECEIPT</div>
               </div>
+              {/* RED accent stripe */}
+              <div style={{ height: "3px", backgroundColor: "#d12525" }} />
 
-              {/* Table */}
-              <table className="w-full mb-6 border border-gray-200 rounded-lg overflow-hidden text-sm">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-gray-700 font-semibold">QTY (Days)</th>
-                    <th className="px-4 py-2 text-left text-gray-700 font-semibold">Description</th>
-                    <th className="px-4 py-2 text-right text-gray-700 font-semibold">Unit Price / Day</th>
-                    <th className="px-4 py-2 text-right text-gray-700 font-semibold">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-t border-gray-200">
-                    <td className="px-4 py-3 text-gray-800">{previewBill.totalDays}</td>
-                    <td className="px-4 py-3 text-gray-800">Security Services</td>
-                    <td className="px-4 py-3 text-right text-gray-800">
-                      ₹{previewBill.amountPerDay.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-800">
-                      ₹{previewBill.totalAmount.toFixed(2)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              {/* Body padding */}
+              <div style={{ padding: "20px 24px" }}>
 
-              {/* Totals */}
-              <div className="flex justify-end">
-                <div className="w-56 space-y-2">
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Subtotal</span>
-                    <span>₹{previewBill.totalAmount.toFixed(2)}</span>
+                {/* Company address */}
+                <p style={{ fontSize: "11px", color: "#888", marginBottom: "16px" }}>
+                  No. 418, Shivalik Satyamev, SP Ring Rd Junction, Ambli - Bopal Rd, Ahmedabad, Gujarat - 380058
+                </p>
+
+                {/* Bill To / Receipt meta */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
+                  <div>
+                    <p style={{ fontSize: "9px", fontWeight: 700, color: "#152c56", textTransform: "uppercase", marginBottom: "4px" }}>Bill To</p>
+                    <p style={{ fontSize: "12px", color: "#333", whiteSpace: "pre-line", lineHeight: 1.5 }}>{previewBill.address}</p>
                   </div>
-                  <div className="flex justify-between font-bold text-base bg-gray-100 rounded px-3 py-2">
-                    <span>TOTAL</span>
-                    <span>₹{previewBill.totalAmount.toFixed(2)}</span>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "4px" }}>
+                      <span style={{ color: "#152c56", fontWeight: 700 }}>Receipt #</span>
+                      <span style={{ fontWeight: 700, color: "#111" }}>{previewBill.billNumber || "N/A"}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+                      <span style={{ color: "#152c56", fontWeight: 700 }}>Receipt Date</span>
+                      <span style={{ fontWeight: 700, color: "#111" }}>{new Date(previewBill.createdAt).toLocaleDateString("en-GB")}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Terms */}
-              <div className="mt-6 pt-4 border-t border-gray-200 text-xs text-gray-500">
-                <p className="font-semibold text-gray-700 mb-1">Terms & Conditions</p>
-                <p>Payment is due upon receipt.</p>
-              </div>
+                {/* Table */}
+                <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "16px", fontSize: "12px" }}>
+                  <thead>
+                    <tr style={{ backgroundColor: "#152c56" }}>
+                      <th style={{ padding: "8px 12px", textAlign: "left", color: "white", fontWeight: 700 }}>QTY (Days)</th>
+                      <th style={{ padding: "8px 12px", textAlign: "left", color: "white", fontWeight: 700 }}>Description</th>
+                      <th style={{ padding: "8px 12px", textAlign: "right", color: "white", fontWeight: 700 }}>Unit Price (Per Day)</th>
+                      <th style={{ padding: "8px 12px", textAlign: "right", color: "white", fontWeight: 700 }}>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ backgroundColor: "#fafafa", borderBottom: "1px solid #e5e7eb" }}>
+                      <td style={{ padding: "10px 12px", color: "#333" }}>{previewBill.totalDays}</td>
+                      <td style={{ padding: "10px 12px", color: "#333" }}>Security Services</td>
+                      <td style={{ padding: "10px 12px", textAlign: "right", color: "#333" }}>Rs.{previewBill.amountPerDay.toFixed(2)}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "right", color: "#333" }}>Rs.{previewBill.totalAmount.toFixed(2)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* Totals */}
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
+                  <div style={{ width: "220px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#888", marginBottom: "6px" }}>
+                      <span>Subtotal</span>
+                      <span>Rs.{previewBill.totalAmount.toFixed(2)}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#d12525", color: "white", fontWeight: 700, fontSize: "13px", padding: "8px 12px", borderRadius: "4px" }}>
+                      <span>TOTAL</span>
+                      <span>Rs.{previewBill.totalAmount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Terms */}
+                <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "12px", fontSize: "11px", color: "#888" }}>
+                  <p style={{ fontWeight: 700, color: "#152c56", marginBottom: "2px" }}>Terms &amp; Conditions</p>
+                  <p>Payment is due upon receipt.</p>
+                </div>
+
+              </div>{/* end body padding */}
+
+            </div>{/* end pdf-mirror body */}
+
+            {/* Footer band */}
+            <div style={{ backgroundColor: "#152c56", padding: "8px 24px", textAlign: "center", fontSize: "10px", color: "rgba(180,190,210,0.9)" }}>
+              Eagle Eye Security Service — Always Vigilant
             </div>
+
           </div>
         </div>
       )}
