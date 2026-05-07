@@ -252,7 +252,7 @@ const drawBack = async (pdf: jsPDF, ox: number, oy: number) => {
   // ================= ROWS (NO RADIUS, CONNECTED) =================
   const emergency = [
     ["Ambulance", "108"],
-    ["Police", "100"],
+    ["Police", "100 / 112"],
     ["Fire Brigade", "101"],
   ];
 
@@ -437,7 +437,7 @@ export const IDCardBack: React.FC<IDCardBackProps> = ({ backRef }) => (
         <div style={{ backgroundColor: RED, borderRadius: "4px 4px 0 0", padding: "3px 6px" }}>
           <div style={{ fontSize: "7px", fontWeight: "900", color: "#fff", textAlign: "center", letterSpacing: "0.5px" }}>🚨 EMERGENCY</div>
         </div>
-        {([["🚑", "Ambulance", "108"], ["👮", "Police", "100"], ["🚒", "Fire Brigade", "101"]] as [string, string, string][]).map(([icon, label, num]) => (
+        {([["🚑", "Ambulance", "108"], ["👮", "Police", "100 / 112"], ["🚒", "Fire Brigade", "101"]] as [string, string, string][]).map(([icon, label, num]) => (
           <div key={label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 6px", borderBottom: "1px solid #f3f4f6", backgroundColor: "#fff8f8" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
               <span style={{ fontSize: "9px" }}>{icon}</span>

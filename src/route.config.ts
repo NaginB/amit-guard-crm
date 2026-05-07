@@ -1,4 +1,6 @@
 import React from "react";
+import { ROLES } from "./constants/roles.constants";
+import type { Role } from "./constants/roles.constants";
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
 import { GuardManagement } from "./pages/GuardManagement";
@@ -25,6 +27,8 @@ export interface RouteConfig {
   element: React.ComponentType;
   isPrivate?: boolean;
   dashboard?: boolean;
+  /** If defined, only users with one of these roles can access this route */
+  roles?: Role[];
 }
 
 export const routes: RouteConfig[] = [
@@ -146,6 +150,7 @@ export const routes: RouteConfig[] = [
     element: QuickBillManagement,
     isPrivate: true,
     dashboard: true,
+    roles: [ROLES.ADMIN],
   },
   {
     path: "/payroll",

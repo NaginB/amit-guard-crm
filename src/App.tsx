@@ -10,7 +10,8 @@ import { store } from "./app/store";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "./app/store";
 import { routes } from "./route.config";
-import { fetchCurrentUser } from "./features/auth/authSlice";
+import { fetchCurrentUser, logout } from "./features/auth/authSlice";
+import type { RouteConfig } from "./route.config";
 import { DashboardLayout } from "./components/layouts/DashboardLayout";
 import { GuardLayout } from "./components/layouts/GuardLayout";
 
@@ -36,6 +37,34 @@ const GuardProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const guardToken = localStorage.getItem("guardToken");
   return guardToken ? <>{children}</> : <Navigate to="/guard/login" replace />;
+};
+
+// Role-based access control route
+const RoleProtectedRoute: React.FC<{
+  children: React.ReactNode;
+  route: RouteConfig;
+}> = ({ children, route }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { user } = useSelector((state: RootState) => state.auth);
+
+  // If no roles defined on route, allow access
+  if (!route.roles || route.roles.length === 0) {
+    return <>{children}</>;
+  }
+
+  // If user is still loading (null but token exists), allow through temporarily
+  const userRole = user?.role;
+  if (!userRole) {
+    return <>{children}</>;
+  }
+
+  // Check if user has permission
+  if (!route.roles.includes(userRole as any)) {
+    dispatch(logout());
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
 };
 
 const AppRoutes: React.FC = () => {
@@ -73,13 +102,15 @@ const AppRoutes: React.FC = () => {
           // Admin protected routes with dashboard layout
           element = (
             <ProtectedRoute>
-              {route.dashboard ? (
-                <DashboardLayout>
+              <RoleProtectedRoute route={route}>
+                {route.dashboard ? (
+                  <DashboardLayout>
+                    <Component />
+                  </DashboardLayout>
+                ) : (
                   <Component />
-                </DashboardLayout>
-              ) : (
-                <Component />
-              )}
+                )}
+              </RoleProtectedRoute>
             </ProtectedRoute>
           );
         } else {

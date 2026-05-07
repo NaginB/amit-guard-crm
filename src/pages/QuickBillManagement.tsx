@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Plus, Download, Trash2, Edit } from "lucide-react";
+import { Plus, Download, Trash2, Edit, Eye, X } from "lucide-react";
 import { Card, Button, Input } from "../components/common";
+import ConfirmModal from "../components/common/ConfirmModal";
 import {
   fetchQuickBills,
   createQuickBill,
@@ -26,6 +27,13 @@ export const QuickBillManagement: React.FC = () => {
   // Edit states
   const [isEditMode, setIsEditMode] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+
+  // Delete confirm modal
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Preview modal
+  const [previewBill, setPreviewBill] = useState<any | null>(null);
 
   useEffect(() => {
     dispatch(fetchQuickBills());
@@ -90,21 +98,32 @@ export const QuickBillManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this bill?")) {
-      dispatch(deleteQuickBill(id))
-        .unwrap()
-        .then(() => {
-          toast.success("Bill deleted successfully");
-        });
+  // Delete flow using ConfirmModal
+  const handleDeleteClick = (id: string) => {
+    setDeleteTargetId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) return;
+    setIsDeleting(true);
+    try {
+      await dispatch(deleteQuickBill(deleteTargetId)).unwrap();
+      toast.success("Bill deleted successfully");
+    } finally {
+      setIsDeleting(false);
+      setDeleteTargetId(null);
     }
   };
 
-  const downloadPDF = (bill: any) => {
+  const handleCancelDelete = () => {
+    setDeleteTargetId(null);
+  };
+
+  const buildPDFDoc = (bill: any) => {
     const doc = new jsPDF();
 
     // Blue header bar
-    doc.setFillColor(65, 105, 225); // Royal Blue
+    doc.setFillColor(65, 105, 225);
     doc.rect(0, 10, 210, 15, "F");
 
     doc.setTextColor(255, 255, 255);
@@ -119,8 +138,11 @@ export const QuickBillManagement: React.FC = () => {
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    const addressLines = doc.splitTextToSize("No. 418, Shivalik Satyamev, SP Ring Rd Junction, Ambli - Bopal Rd Ahmedabad, Gujarat - 380058", 60);
-    doc.text(addressLines, 14, 35);
+    const companyAddrLines = doc.splitTextToSize(
+      "No. 418, Shivalik Satyamev, SP Ring Rd Junction, Ambli - Bopal Rd Ahmedabad, Gujarat - 380058",
+      60
+    );
+    doc.text(companyAddrLines, 14, 35);
 
     // Bill To & Receipt Info
     doc.setFontSize(10);
@@ -144,7 +166,7 @@ export const QuickBillManagement: React.FC = () => {
     const startY = 85;
     doc.setFillColor(240, 240, 240);
     doc.rect(14, startY, 182, 10, "F");
-    
+
     doc.setFont("helvetica", "bold");
     doc.setTextColor(0, 0, 0);
     doc.text("QTY (Days)", 20, startY + 7);
@@ -161,11 +183,11 @@ export const QuickBillManagement: React.FC = () => {
 
     // Table Borders
     doc.setDrawColor(220, 220, 220);
-    doc.line(14, startY, 196, startY); // top
-    doc.line(14, startY + 10, 196, startY + 10); // header bottom
-    doc.line(14, startY + 22, 196, startY + 22); // row bottom
-    doc.line(14, startY, 14, startY + 22); // left border
-    doc.line(196, startY, 196, startY + 22); // right border
+    doc.line(14, startY, 196, startY);
+    doc.line(14, startY + 10, 196, startY + 10);
+    doc.line(14, startY + 22, 196, startY + 22);
+    doc.line(14, startY, 14, startY + 22);
+    doc.line(196, startY, 196, startY + 22);
 
     // Totals
     const finalY = startY + 22 + 10;
@@ -190,7 +212,24 @@ export const QuickBillManagement: React.FC = () => {
     doc.setFont("helvetica", "normal");
     doc.text("Payment is due upon receipt.", 14, finalY + 45);
 
-    doc.save(`${bill.billNumber || 'quick_bill'}.pdf`);
+    return doc;
+  };
+
+  const downloadPDF = (bill: any) => {
+    const doc = buildPDFDoc(bill);
+    doc.save(`${bill.billNumber || "quick_bill"}.pdf`);
+  };
+
+  const previewPDF = (bill: any) => {
+    setPreviewBill(bill);
+  };
+
+  const closePreview = () => {
+    setPreviewBill(null);
+  };
+
+  const downloadFromPreview = () => {
+    if (previewBill) downloadPDF(previewBill);
   };
 
   return (
@@ -245,7 +284,7 @@ export const QuickBillManagement: React.FC = () => {
                 </tr>
               ) : (
                 quickBills.map((bill) => (
-                  <tr key={bill._id}>
+                  <tr key={bill._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {bill.billNumber || "N/A"}
                     </td>
@@ -259,6 +298,13 @@ export const QuickBillManagement: React.FC = () => {
                       ₹{bill.totalAmount.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={() => previewPDF(bill)}
+                        className="text-purple-600 hover:text-purple-900 mx-2"
+                        title="Preview Bill"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
                       <button
                         onClick={() => downloadPDF(bill)}
                         className="text-blue-600 hover:text-blue-900 mx-2"
@@ -274,7 +320,7 @@ export const QuickBillManagement: React.FC = () => {
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(bill._id)}
+                        onClick={() => handleDeleteClick(bill._id)}
                         className="text-red-600 hover:text-red-900 mx-2"
                         title="Delete"
                       >
@@ -289,7 +335,124 @@ export const QuickBillManagement: React.FC = () => {
         </div>
       </Card>
 
-      {/* Modal */}
+      {/* Delete Confirm Modal */}
+      <ConfirmModal
+        isOpen={!!deleteTargetId}
+        title="Delete Quick Bill"
+        message="Are you sure you want to delete this bill? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+
+      {/* Bill Preview Modal */}
+      {previewBill && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 py-8 px-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl">
+            {/* Preview Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <h2 className="text-lg font-semibold text-gray-900">Bill Preview</h2>
+              <div className="flex items-center gap-2">
+                <Button onClick={downloadFromPreview} className="flex items-center gap-2 text-sm">
+                  <Download className="h-4 w-4" />
+                  Download PDF
+                </Button>
+                <button
+                  onClick={closePreview}
+                  className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <X className="h-5 w-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+
+            {/* Preview Content */}
+            <div className="p-6 font-sans text-sm">
+              {/* Company Header */}
+              <div className="bg-blue-700 text-white rounded-lg px-6 py-4 flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-xl font-bold">Eagle Eye Security</h3>
+                  <p className="text-blue-200 text-xs mt-1">
+                    No. 418, Shivalik Satyamev, SP Ring Rd Junction,<br />
+                    Ambli - Bopal Rd, Ahmedabad, Gujarat - 380058
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-lg font-bold tracking-widest">RECEIPT</span>
+                </div>
+              </div>
+
+              {/* Bill Meta */}
+              <div className="grid grid-cols-2 gap-6 mb-6">
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Bill To</p>
+                  <p className="text-gray-800 whitespace-pre-line">{previewBill.address}</p>
+                </div>
+                <div className="text-right space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Receipt #</span>
+                    <span className="font-medium text-gray-900">{previewBill.billNumber || "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Date</span>
+                    <span className="font-medium text-gray-900">
+                      {new Date(previewBill.createdAt).toLocaleDateString("en-GB")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Table */}
+              <table className="w-full mb-6 border border-gray-200 rounded-lg overflow-hidden text-sm">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-gray-700 font-semibold">QTY (Days)</th>
+                    <th className="px-4 py-2 text-left text-gray-700 font-semibold">Description</th>
+                    <th className="px-4 py-2 text-right text-gray-700 font-semibold">Unit Price / Day</th>
+                    <th className="px-4 py-2 text-right text-gray-700 font-semibold">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-t border-gray-200">
+                    <td className="px-4 py-3 text-gray-800">{previewBill.totalDays}</td>
+                    <td className="px-4 py-3 text-gray-800">Security Services</td>
+                    <td className="px-4 py-3 text-right text-gray-800">
+                      ₹{previewBill.amountPerDay.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-800">
+                      ₹{previewBill.totalAmount.toFixed(2)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Totals */}
+              <div className="flex justify-end">
+                <div className="w-56 space-y-2">
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Subtotal</span>
+                    <span>₹{previewBill.totalAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-base bg-gray-100 rounded px-3 py-2">
+                    <span>TOTAL</span>
+                    <span>₹{previewBill.totalAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Terms */}
+              <div className="mt-6 pt-4 border-t border-gray-200 text-xs text-gray-500">
+                <p className="font-semibold text-gray-700 mb-1">Terms & Conditions</p>
+                <p>Payment is due upon receipt.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
