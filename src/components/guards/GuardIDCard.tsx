@@ -92,12 +92,12 @@ const drawFront = async (pdf: jsPDF, guard: Guard, ox: number, oy: number) => {
 
   pdf.setFontSize(7);
   p.text(BLUE_RGB);
-  pdf.text("SECURITY", ox + 3, oy + 10.2);
+  pdf.text("SECURITY SERVICE", ox + 3, oy + 10.2);
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(4.5);
   p.text(GRAY_RGB);
-  pdf.text("SAFETY FIRST \u00B7 ALWAYS", ox + 3, oy + 12.5);
+  pdf.text("ALWAYS VIGILANT", ox + 3, oy + 12.5);
 
   // Logo
   try {
@@ -113,51 +113,43 @@ const drawFront = async (pdf: jsPDF, guard: Guard, ox: number, oy: number) => {
   p.fill(LIGHT);
   p.draw(RED_RGB);
   pdf.setLineWidth(0.5);
-  pdf.roundedRect(ox + 3, oy + 15, 19, 24, 1, 1, "FD");
+  pdf.roundedRect(ox + 3, oy + 16, 17, 21, 1, 1, "FD");
 
   if (guard.photo) {
     try {
       const photoData = await imgToDataURL(guard.photo);
-      pdf.addImage(photoData, "JPEG", ox + 3.4, oy + 15.4, 18.2, 23.2);
+      pdf.addImage(photoData, "JPEG", ox + 3.4, oy + 16.4, 16.2, 20.2);
     } catch (_) { /* no photo */ }
   }
 
   // ── Detail rows ─────────────────────────────────────────────────────────────
   const rows: [string, string][] = [
     ["Name", `${guard.firstName} ${guard.lastName}`],
-    ["Phone", guard.contactNumber || "N/A"],
-    ["Emp. Code", `EES-${guard.guardId || "N/A"}`],
+    ["Designation", `${guard.designation || "N/A"}`],
     ["D.O.B", guard.dateOfBirth ? fmtDate(new Date(guard.dateOfBirth)) : "N/A"],
+    ["Gender", guard.gender || "N/A"],
     ["Valid Upto", fmtDate(getValidUntil(guard))],
   ];
 
-  let rowY = oy + 17;
+  let rowY = oy + 18;
   rows.forEach(([label, value]) => {
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(5.5);
     p.text(MID);
-    pdf.text(label, ox + 25, rowY);
-    pdf.text(":", ox + 41, rowY);
+    pdf.text(label, ox + 22, rowY);
+    pdf.text(":", ox + 38, rowY);
     pdf.setFont("helvetica", "bold");
     p.text(DARK);
-    pdf.text(value, ox + 43, rowY);
+    pdf.text(value, ox + 40, rowY);
     rowY += 4.2;
   });
 
   // ── Bottom designation strip ────────────────────────────────────────────────────────
-  p.rect(ox, oy + CH - 6.5, CW, 6.5, BLUE_RGB);
-
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(5.5);
-  p.text(WHITE);
-  pdf.text("DESIGNATION : SECURITY GUARD", ox + 3, oy + CH - 2.5);
-
-  if (guard.gender) {
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(5.5);
-    p.text([200, 210, 225]);
-    pdf.text(guard.gender.toUpperCase(), ox + CW - 3, oy + CH - 2.5, { align: "right" });
-  }
+  p.text(MID);
+  pdf.text("For Eagle Eye Security Service", ox + 3, oy + CH - 9);
+  pdf.text("Authorize Signature", ox + 3, oy + CH - 2);
 };
 
 // ─── Draw back card using vector ops ──────────────────────────────────────────
@@ -177,45 +169,36 @@ const drawBack = async (pdf: jsPDF, ox: number, oy: number) => {
   // Logo
   try {
     const logoData = await imgToDataURL("/logo.png");
-    pdf.addImage(logoData, "JPEG", ox + 3, oy + 3, 7, 7);
+    pdf.addImage(logoData, "JPEG", ox + 3, oy + 3, 9, 9);
   } catch (_) { /* skip */ }
 
   // Brand name
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(9);
+  pdf.setFontSize(11);
   p.text(RED_RGB);
-  const eagleW = pdf.getTextWidth("EAGLEEYE ");
-  pdf.text("EAGLEEYE ", ox + 12, oy + 7);
+  pdf.text("EAGLE EYE", ox + 13, oy + 6);
+
+  pdf.setFontSize(7);
   p.text(BLUE_RGB);
-  pdf.text("SECURITY", ox + 12 + eagleW, oy + 7);
+  pdf.text("SECURITY SERVICE", ox + 13, oy + 9);
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(4.5);
   p.text(GRAY_RGB);
-  pdf.text("SAFETY FIRST \u00B7 SAFETY ALWAYS", ox + 12, oy + 9.5);
-
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(5.5);
-  p.text(BLUE_RGB);
-  pdf.text("PREMIUM SECURITY SERVICES", ox + 3, oy + 14);
-
-  pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(4.5);
-  p.text(MID);
-  pdf.text("INDUSTRIAL | COMMERCIAL | RESIDENTIAL", ox + 3, oy + 17);
+  pdf.text("ALWAYS VIGILANT", ox + 13, oy + 11.5);
 
   // Divider
   pdf.setLineWidth(0.2);
-  p.line(ox + 3, oy + 18.5, ox + 57, oy + 18.5, [229, 231, 235]);
+  p.line(ox + 3, oy + 14, ox + 57, oy + 14, [229, 231, 235]);
 
   // Contact rows
   const contacts: [string, string][] = [
-    ["Addr.", "H.O. 1207, Satyamev Elite, Bopal-Ambli Jn., Ahd."],
-    ["Tel.", "1800-309-7890"],
-    ["Email", "info@eagleeye-security.com"],
-    ["Web", "www.eagleeye-security.com"],
+    ["Addr.", COMPANY_ADDRESS],
+    ["Tel.", COMPANY_PHONE],
+    ["Email", COMPANY_EMAIL],
+    ["Web", COMPANY_WEBSITE],
   ];
-  let cy = oy + 21.5;
+  let cy = oy + 17;
   contacts.forEach(([label, text]) => {
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(4.5);
@@ -223,8 +206,10 @@ const drawBack = async (pdf: jsPDF, ox: number, oy: number) => {
     pdf.text(`${label}`, ox + 3, cy);
     pdf.setFont("helvetica", "normal");
     p.text(MID);
-    pdf.text(text, ox + 11, cy);
-    cy += 3.5;
+    // Split long text (e.g. address) into multiple lines
+    const textLines = pdf.splitTextToSize(text, 44);
+    pdf.text(textLines, ox + 11, cy);
+    cy += 3.5 * textLines.length;
   });
 
   // ── Vertical divider ─────────────────────────────────────────────────────────
