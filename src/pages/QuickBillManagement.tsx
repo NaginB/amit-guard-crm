@@ -206,7 +206,7 @@ export const QuickBillManagement: React.FC = () => {
     doc.text("QTY (Days)", 20, startY + 6);
     doc.text("DESCRIPTION", 60, startY + 6);
     doc.text("UNIT PRICE (Per Day)", 130, startY + 6);
-    doc.text("AMOUNT", 196, startY + 6, { align: "right" });
+    doc.text("AMOUNT", 192, startY + 6, { align: "right" });
 
     // Row
     doc.setFillColor(250, 250, 252);
@@ -217,7 +217,7 @@ export const QuickBillManagement: React.FC = () => {
     doc.text(bill.totalDays.toString(), 25, startY + 16);
     doc.text("Security Service", 60, startY + 16);
     doc.text(`Rs.${bill.amountPerDay.toFixed(2)}`, 130, startY + 16);
-    doc.text(`Rs.${bill.totalAmount.toFixed(2)}`, 196, startY + 16, { align: "right" });
+    doc.text(`Rs.${bill.totalAmount.toFixed(2)}`, 192, startY + 16, { align: "right" });
 
     // Borders
     doc.setDrawColor(200, 200, 210);

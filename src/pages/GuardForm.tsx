@@ -344,9 +344,14 @@ export const GuardForm: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2 order-first">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Photo
+                  Photo *
                 </label>
-                <input type="hidden" {...register("photo")} />
+                <input
+                  type="hidden"
+                  {...register("photo", {
+                    required: "Profile photo is required",
+                  })}
+                />
                 <input type="hidden" {...register("photoPublicId")} />
                 <FileUpload
                   label="Upload guard image"
@@ -372,6 +377,11 @@ export const GuardForm: React.FC = () => {
                     }
                   }}
                 />
+                {errors.photo && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.photo.message}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -437,8 +447,8 @@ export const GuardForm: React.FC = () => {
                       if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
                         age--;
                       }
-                      if (age < 22 || age > 50) {
-                        return "Guard age must be between 22 and 50";
+                      if (age < 20 || age > 50) {
+                        return "Guard age must be between 20 and 50";
                       }
                       return true;
                     }
@@ -777,8 +787,13 @@ export const GuardForm: React.FC = () => {
               <div className="sm:col-span-2 mt-4 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Aadhaar Card Front</label>
-                    <input type="hidden" {...register("aadharCardFront")} />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Aadhaar Card Front *</label>
+                    <input
+                      type="hidden"
+                      {...register("aadharCardFront", {
+                        required: "Aadhaar card front image is required",
+                      })}
+                    />
                     <input type="hidden" {...register("aadharCardFrontPublicId")} />
                     <FileUpload
                       label="Upload Aadhaar Front"
@@ -791,10 +806,20 @@ export const GuardForm: React.FC = () => {
                         if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
                       }}
                     />
+                    {errors.aadharCardFront && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.aadharCardFront.message}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Aadhaar Card Back</label>
-                    <input type="hidden" {...register("aadharCardBack")} />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Aadhaar Card Back *</label>
+                    <input
+                      type="hidden"
+                      {...register("aadharCardBack", {
+                        required: "Aadhaar card back image is required",
+                      })}
+                    />
                     <input type="hidden" {...register("aadharCardBackPublicId")} />
                     <FileUpload
                       label="Upload Aadhaar Back"
@@ -807,6 +832,11 @@ export const GuardForm: React.FC = () => {
                         if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
                       }}
                     />
+                    {errors.aadharCardBack && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.aadharCardBack.message}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

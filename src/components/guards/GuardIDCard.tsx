@@ -149,7 +149,7 @@ const drawFront = async (pdf: jsPDF, guard: Guard, ox: number, oy: number) => {
   pdf.setFontSize(5.5);
   p.text(MID);
   pdf.text("For Eagle Eye Security Service", ox + 3, oy + CH - 9);
-  pdf.text("Authorize Signature", ox + 3, oy + CH - 2);
+  pdf.text("Authorise Signature", ox + 3, oy + CH - 2);
 };
 
 // ─── Draw back card using vector ops ──────────────────────────────────────────
@@ -397,7 +397,7 @@ export const IDCardFront: React.FC<IDCardFrontProps> = ({ guard, cardRef }) => {
       </div>
       <div className="pl-3 mt-1 flex flex-col gap-[18px]">
         <p className="text-[8px] text-[#374151]">For Eagle Eye Security Service</p>
-        <p className="text-[8px] text-[#374151]">Authorize Signature</p>
+        <p className="text-[8px] text-[#374151]">Authorise Signature</p>
       </div>
     </div>
   );
