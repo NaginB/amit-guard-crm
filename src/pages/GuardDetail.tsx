@@ -45,6 +45,21 @@ const Field: React.FC<{ label: string; value: string }> = ({ label, value }) => 
   </div>
 );
 
+const DocumentPreview: React.FC<{ label: string; src?: string }> = ({ label, src }) => (
+  <div className="mt-2 border border-gray-200 rounded-lg p-3 bg-gray-50">
+    <p className="text-xs font-medium text-gray-700 mb-2">{label}</p>
+    {src ? (
+      <a href={src} target="_blank" rel="noreferrer">
+        <img src={src} alt={label} className="w-full h-32 object-cover rounded shadow-sm hover:opacity-90 transition-opacity" />
+      </a>
+    ) : (
+      <div className="h-32 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs border border-dashed border-gray-300">
+        Not provided
+      </div>
+    )}
+  </div>
+);
+
 const SectionCard: React.FC<{ title: string; children: React.ReactNode; cols?: 2 | 3 }> = ({
   title,
   children,
@@ -216,19 +231,36 @@ export const GuardDetail: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <Card>
             <h3 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-100">KYC Documents</h3>
-            <div className="space-y-3">
-              <InfoRow icon={FileText} label="Aadhaar Number" value={currentGuard.aadharNumber || "Not provided"} />
-              <InfoRow icon={FileText} label="PAN Card Number" value={currentGuard.panNumber || "Not provided"} />
+            <div className="space-y-4">
+              <div>
+                <InfoRow icon={FileText} label="Aadhaar Number" value={currentGuard.aadharNumber || "Not provided"} />
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <DocumentPreview label="Aadhaar Front" src={(currentGuard as any).aadharCardFront} />
+                  <DocumentPreview label="Aadhaar Back" src={(currentGuard as any).aadharCardBack} />
+                </div>
+              </div>
+              <div className="border-t border-gray-100 pt-4">
+                <InfoRow icon={FileText} label="PAN Card Number" value={currentGuard.panNumber || "Not provided"} />
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <DocumentPreview label="PAN Front" src={(currentGuard as any).panCardFront} />
+                  <DocumentPreview label="PAN Back" src={(currentGuard as any).panCardBack} />
+                </div>
+              </div>
             </div>
           </Card>
 
           <Card>
             <h3 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-100">Bank Details</h3>
-            <div className="space-y-3">
-              <InfoRow icon={Banknote} label="Bank Name" value={currentGuard.bankName || "Not provided"} />
-              <InfoRow icon={Banknote} label="Account Number" value={currentGuard.accountNumber || "Not provided"} />
-              <InfoRow icon={Banknote} label="IFSC Code" value={currentGuard.ifscCode || "Not provided"} />
-              <InfoRow icon={Banknote} label="Branch Name" value={(currentGuard as any).branchName || "Not provided"} />
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <InfoRow icon={Banknote} label="Bank Name" value={currentGuard.bankName || "Not provided"} />
+                <InfoRow icon={Banknote} label="Account Number" value={currentGuard.accountNumber || "Not provided"} />
+                <InfoRow icon={Banknote} label="IFSC Code" value={currentGuard.ifscCode || "Not provided"} />
+                <InfoRow icon={Banknote} label="Branch Name" value={(currentGuard as any).branchName || "Not provided"} />
+              </div>
+              <div className="border-t border-gray-100 pt-4">
+                <DocumentPreview label="Bank Proof (Passbook / Cheque)" src={(currentGuard as any).bankProof} />
+              </div>
             </div>
           </Card>
         </div>

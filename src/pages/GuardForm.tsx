@@ -33,7 +33,7 @@ interface GuardFormData {
   lastName: string;
   dateOfBirth?: string;
   gender?: "Male" | "Female" | "Other";
-  designation: string;
+  designation: Designation;
   contactNumber: string;
   alternateContactNumber?: string;
   email?: string;
@@ -48,6 +48,16 @@ interface GuardFormData {
   panNumber?: string;
   photo?: string;
   photoPublicId?: string;
+  aadharCardFront?: string;
+  aadharCardFrontPublicId?: string;
+  aadharCardBack?: string;
+  aadharCardBackPublicId?: string;
+  panCardFront?: string;
+  panCardFrontPublicId?: string;
+  panCardBack?: string;
+  panCardBackPublicId?: string;
+  bankProof?: string;
+  bankProofPublicId?: string;
   fatherName?: string;
   motherName?: string;
   emergencyContactName?: string;
@@ -78,9 +88,9 @@ export const GuardForm: React.FC = () => {
   const [childErrors, setChildErrors] = useState<
     Record<number, { name?: string; age?: string; gender?: string }>
   >({});
-  const [uploadedImagePublicId, setUploadedImagePublicId] = useState<
-    string | null
-  >(null);
+  const [uploadedImagePublicIds, setUploadedImagePublicIds] = useState<
+    string[]
+  >([]);
 
 
   const isEditMode = !!id;
@@ -101,7 +111,6 @@ export const GuardForm: React.FC = () => {
 
   const joiningDateValue = watch("joiningDate");
   const expiryDateValue = watch("expiryDate");
-  const gender = watch("gender");
   const dateOfBirthValue = watch("dateOfBirth");
 
   let calculatedAge: number | string = "";
@@ -152,6 +161,16 @@ export const GuardForm: React.FC = () => {
         panNumber: currentGuard.panNumber,
         photo: currentGuard.photo,
         photoPublicId: currentGuard.photoPublicId,
+        aadharCardFront: currentGuard.aadharCardFront,
+        aadharCardFrontPublicId: currentGuard.aadharCardFrontPublicId,
+        aadharCardBack: currentGuard.aadharCardBack,
+        aadharCardBackPublicId: currentGuard.aadharCardBackPublicId,
+        panCardFront: currentGuard.panCardFront,
+        panCardFrontPublicId: currentGuard.panCardFrontPublicId,
+        panCardBack: currentGuard.panCardBack,
+        panCardBackPublicId: currentGuard.panCardBackPublicId,
+        bankProof: currentGuard.bankProof,
+        bankProofPublicId: currentGuard.bankProofPublicId,
         fatherName: currentGuard.fatherName,
         motherName: currentGuard.motherName,
         emergencyContactName: currentGuard.emergencyContactName,
@@ -197,11 +216,13 @@ export const GuardForm: React.FC = () => {
     document.body.style.overflow = "auto";
 
     // Delete uploaded image if it exists and we're not in edit mode
-    if (uploadedImagePublicId && !isEditMode) {
+    if (uploadedImagePublicIds.length > 0 && !isEditMode) {
       try {
-        await apiService.deleteUpload(uploadedImagePublicId);
+        await Promise.all(
+          uploadedImagePublicIds.map((id) => apiService.deleteUpload(id))
+        );
       } catch (error) {
-        console.warn("Failed to delete uploaded image:", error);
+        console.warn("Failed to delete uploaded images:", error);
       }
     }
 
@@ -243,6 +264,7 @@ export const GuardForm: React.FC = () => {
       expiryDate: data.expiryDate
         ? new Date(data.expiryDate).toISOString()
         : undefined,
+      salary: data.salary || 0,
     };
 
     if (children.length > 0) {
@@ -266,7 +288,7 @@ export const GuardForm: React.FC = () => {
           toast.success("Guard created successfully!");
         }
       }
-      setUploadedImagePublicId(null); // Clear the uploaded image tracking
+      setUploadedImagePublicIds([]); // Clear the uploaded image tracking
       navigate("/guards");
     } catch {
       void 0;
@@ -346,7 +368,7 @@ export const GuardForm: React.FC = () => {
                       shouldValidate: true,
                     });
                     if (publicId) {
-                      setUploadedImagePublicId(publicId);
+                      setUploadedImagePublicIds((prev) => [...prev, publicId]);
                     }
                   }}
                 />
@@ -485,7 +507,7 @@ export const GuardForm: React.FC = () => {
                   options={Object.values(Designation).map(value => ({ value, label: value }))}
                   value={watch("designation") || ""}
                   onChange={(value) =>
-                    setValue("designation", value, {
+                    setValue("designation", value as Designation, {
                       shouldValidate: true,
                     })
                   }
@@ -752,6 +774,76 @@ export const GuardForm: React.FC = () => {
                   </p>
                 )}
               </div>
+              <div className="sm:col-span-2 mt-4 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Aadhaar Card Front</label>
+                    <input type="hidden" {...register("aadharCardFront")} />
+                    <input type="hidden" {...register("aadharCardFrontPublicId")} />
+                    <FileUpload
+                      label="Upload Aadhaar Front"
+                      accept="image/*"
+                      value={watch("aadharCardFront") !== undefined ? watch("aadharCardFront") || undefined : (currentGuard as Guard | null)?.aadharCardFront || undefined}
+                      imagePublicId={watch("aadharCardFrontPublicId") !== undefined ? watch("aadharCardFrontPublicId") || undefined : (currentGuard as Guard | null)?.aadharCardFrontPublicId || undefined}
+                      onChange={(url, publicId) => {
+                        setValue("aadharCardFront", url, { shouldValidate: true });
+                        setValue("aadharCardFrontPublicId", publicId || "", { shouldValidate: true });
+                        if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Aadhaar Card Back</label>
+                    <input type="hidden" {...register("aadharCardBack")} />
+                    <input type="hidden" {...register("aadharCardBackPublicId")} />
+                    <FileUpload
+                      label="Upload Aadhaar Back"
+                      accept="image/*"
+                      value={watch("aadharCardBack") !== undefined ? watch("aadharCardBack") || undefined : (currentGuard as Guard | null)?.aadharCardBack || undefined}
+                      imagePublicId={watch("aadharCardBackPublicId") !== undefined ? watch("aadharCardBackPublicId") || undefined : (currentGuard as Guard | null)?.aadharCardBackPublicId || undefined}
+                      onChange={(url, publicId) => {
+                        setValue("aadharCardBack", url, { shouldValidate: true });
+                        setValue("aadharCardBackPublicId", publicId || "", { shouldValidate: true });
+                        if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">PAN Card Front</label>
+                    <input type="hidden" {...register("panCardFront")} />
+                    <input type="hidden" {...register("panCardFrontPublicId")} />
+                    <FileUpload
+                      label="Upload PAN Front"
+                      accept="image/*"
+                      value={watch("panCardFront") !== undefined ? watch("panCardFront") || undefined : (currentGuard as Guard | null)?.panCardFront || undefined}
+                      imagePublicId={watch("panCardFrontPublicId") !== undefined ? watch("panCardFrontPublicId") || undefined : (currentGuard as Guard | null)?.panCardFrontPublicId || undefined}
+                      onChange={(url, publicId) => {
+                        setValue("panCardFront", url, { shouldValidate: true });
+                        setValue("panCardFrontPublicId", publicId || "", { shouldValidate: true });
+                        if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">PAN Card Back</label>
+                    <input type="hidden" {...register("panCardBack")} />
+                    <input type="hidden" {...register("panCardBackPublicId")} />
+                    <FileUpload
+                      label="Upload PAN Back"
+                      accept="image/*"
+                      value={watch("panCardBack") !== undefined ? watch("panCardBack") || undefined : (currentGuard as Guard | null)?.panCardBack || undefined}
+                      imagePublicId={watch("panCardBackPublicId") !== undefined ? watch("panCardBackPublicId") || undefined : (currentGuard as Guard | null)?.panCardBackPublicId || undefined}
+                      onChange={(url, publicId) => {
+                        setValue("panCardBack", url, { shouldValidate: true });
+                        setValue("panCardBackPublicId", publicId || "", { shouldValidate: true });
+                        if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </Card>
@@ -936,11 +1028,10 @@ export const GuardForm: React.FC = () => {
                             });
                           }
                         }}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                          childErrors[index]?.name
-                            ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                            : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        }`}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${childErrors[index]?.name
+                          ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                          }`}
                       />
                       {childErrors[index]?.name && (
                         <p className="mt-1 text-sm text-red-600">
@@ -980,11 +1071,10 @@ export const GuardForm: React.FC = () => {
                             return updated;
                           });
                         }}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                          childErrors[index]?.age
-                            ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                            : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                        }`}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${childErrors[index]?.age
+                          ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                          }`}
                       />
                       {childErrors[index]?.age && (
                         <p className="mt-1 text-sm text-red-600">
@@ -1145,7 +1235,7 @@ export const GuardForm: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Salary (Annual)
+                  Salary
                 </label>
                 <input
                   type="number"
@@ -1163,6 +1253,22 @@ export const GuardForm: React.FC = () => {
                     {errors.salary.message}
                   </p>
                 )}
+              </div>
+              <div className="sm:col-span-2 mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Bank Proof</label>
+                <input type="hidden" {...register("bankProof")} />
+                <input type="hidden" {...register("bankProofPublicId")} />
+                <FileUpload
+                  label="Upload Bank Proof (Passbook/Cancelled Cheque)"
+                  accept="image/*"
+                  value={watch("bankProof") !== undefined ? watch("bankProof") || undefined : (currentGuard as Guard | null)?.bankProof || undefined}
+                  imagePublicId={watch("bankProofPublicId") !== undefined ? watch("bankProofPublicId") || undefined : (currentGuard as Guard | null)?.bankProofPublicId || undefined}
+                  onChange={(url, publicId) => {
+                    setValue("bankProof", url, { shouldValidate: true });
+                    setValue("bankProofPublicId", publicId || "", { shouldValidate: true });
+                    if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
+                  }}
+                />
               </div>
             </div>
           </div>

@@ -24,6 +24,16 @@ export interface Guard {
   panNumber?: string;
   photo?: string;
   photoPublicId?: string;
+  aadharCardFront?: string;
+  aadharCardFrontPublicId?: string;
+  aadharCardBack?: string;
+  aadharCardBackPublicId?: string;
+  panCardFront?: string;
+  panCardFrontPublicId?: string;
+  panCardBack?: string;
+  panCardBackPublicId?: string;
+  bankProof?: string;
+  bankProofPublicId?: string;
   fatherName?: string;
   motherName?: string;
   emergencyContactName?: string;
