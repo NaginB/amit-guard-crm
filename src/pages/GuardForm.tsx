@@ -24,6 +24,7 @@ import {
 import apiService from "../services/api";
 import type { AppDispatch, RootState } from "../app/store";
 import type { Guard } from "../features/guards/guardSlice";
+import { Designation } from "../constants/designation.constants";
 
 import toast from "react-hot-toast";
 
@@ -32,6 +33,7 @@ interface GuardFormData {
   lastName: string;
   dateOfBirth?: string;
   gender?: "Male" | "Female" | "Other";
+  designation: string;
   contactNumber: string;
   alternateContactNumber?: string;
   email?: string;
@@ -100,6 +102,19 @@ export const GuardForm: React.FC = () => {
   const joiningDateValue = watch("joiningDate");
   const expiryDateValue = watch("expiryDate");
   const gender = watch("gender");
+  const dateOfBirthValue = watch("dateOfBirth");
+
+  let calculatedAge: number | string = "";
+  if (dateOfBirthValue) {
+    const today = new Date();
+    const dob = new Date(dateOfBirthValue);
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    calculatedAge = age;
+  }
 
   const formatAadhaar = (raw: string) => {
     const digitsOnly = raw.replace(/\D/g, "");
@@ -122,6 +137,7 @@ export const GuardForm: React.FC = () => {
           ? new Date(currentGuard.dateOfBirth).toISOString().split("T")[0]
           : "",
         gender: currentGuard.gender,
+        designation: currentGuard.designation || "",
         contactNumber: currentGuard.contactNumber,
         alternateContactNumber: currentGuard.alternateContactNumber,
         email: currentGuard.email,
@@ -390,6 +406,20 @@ export const GuardForm: React.FC = () => {
                     }`}
                   {...register("dateOfBirth", {
                     required: "Date of birth is required",
+                    validate: (value) => {
+                      if (!value) return true;
+                      const today = new Date();
+                      const dob = new Date(value);
+                      let age = today.getFullYear() - dob.getFullYear();
+                      const m = today.getMonth() - dob.getMonth();
+                      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                        age--;
+                      }
+                      if (age < 22 || age > 50) {
+                        return "Guard age must be between 22 and 50";
+                      }
+                      return true;
+                    }
                   })}
                 />
                 {errors.dateOfBirth && (
@@ -397,6 +427,18 @@ export const GuardForm: React.FC = () => {
                     {errors.dateOfBirth.message}
                   </p>
                 )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Age
+                </label>
+                <input
+                  type="text"
+                  value={calculatedAge}
+                  readOnly
+                  placeholder="Age will be calculated"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 focus:outline-none"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -432,6 +474,40 @@ export const GuardForm: React.FC = () => {
                 {errors.gender && (
                   <p className="mt-1 text-sm text-red-600">
                     {errors.gender.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Designation *
+                </label>
+                <Dropdown
+                  options={Object.values(Designation).map(value => ({ value, label: value }))}
+                  value={watch("designation") || ""}
+                  onChange={(value) =>
+                    setValue("designation", value, {
+                      shouldValidate: true,
+                    })
+                  }
+                  placeholder="Select Designation"
+                  className="w-full"
+                  triggerClassName={
+                    errors.designation
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }
+                />
+                {/* hidden input to register the custom dropdown with react-hook-form for validation */}
+                <input
+                  type="hidden"
+                  {...register("designation", {
+                    required: "Designation is required",
+                  })}
+                  value={watch("designation") || ""}
+                />
+                {errors.designation && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.designation.message}
                   </p>
                 )}
               </div>
@@ -654,7 +730,7 @@ export const GuardForm: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  PAN Number *
+                  PAN Number
                 </label>
                 <input
                   type="text"
@@ -664,7 +740,6 @@ export const GuardForm: React.FC = () => {
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                     }`}
                   {...register("panNumber", {
-                    required: "PAN number is required",
                     pattern: {
                       value: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i,
                       message: "Invalid PAN format",
@@ -994,7 +1069,7 @@ export const GuardForm: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bank Name *
+                  Bank Name
                 </label>
                 <input
                   type="text"
@@ -1003,9 +1078,7 @@ export const GuardForm: React.FC = () => {
                     ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                     }`}
-                  {...register("bankName", {
-                    required: "Bank name is required",
-                  })}
+                  {...register("bankName")}
                 />
                 {errors.bankName && (
                   <p className="mt-1 text-sm text-red-600">
@@ -1015,7 +1088,7 @@ export const GuardForm: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Account Number *
+                  Account Number
                 </label>
                 <input
                   type="text"
@@ -1024,9 +1097,7 @@ export const GuardForm: React.FC = () => {
                     ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                     }`}
-                  {...register("accountNumber", {
-                    required: "Account number is required",
-                  })}
+                  {...register("accountNumber")}
                 />
                 {errors.accountNumber && (
                   <p className="mt-1 text-sm text-red-600">
@@ -1036,7 +1107,7 @@ export const GuardForm: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  IFSC Code *
+                  IFSC Code
                 </label>
                 <input
                   type="text"
@@ -1045,9 +1116,7 @@ export const GuardForm: React.FC = () => {
                     ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                     }`}
-                  {...register("ifscCode", {
-                    required: "IFSC code is required",
-                  })}
+                  {...register("ifscCode")}
                 />
                 {errors.ifscCode && (
                   <p className="mt-1 text-sm text-red-600">
@@ -1057,7 +1126,7 @@ export const GuardForm: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Branch Name *
+                  Branch Name
                 </label>
                 <input
                   type="text"
@@ -1066,9 +1135,7 @@ export const GuardForm: React.FC = () => {
                     ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                     }`}
-                  {...register("branchName", {
-                    required: "Branch name is required",
-                  })}
+                  {...register("branchName")}
                 />
                 {errors.branchName && (
                   <p className="mt-1 text-sm text-red-600">
@@ -1078,7 +1145,7 @@ export const GuardForm: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Salary (Annual) *
+                  Salary (Annual)
                 </label>
                 <input
                   type="number"
@@ -1089,7 +1156,6 @@ export const GuardForm: React.FC = () => {
                     }`}
                   {...register("salary", {
                     valueAsNumber: true,
-                    required: "Salary is required",
                   })}
                 />
                 {errors.salary && (

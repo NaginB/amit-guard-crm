@@ -121,43 +121,40 @@ const drawFront = async (pdf: jsPDF, guard: Guard, ox: number, oy: number) => {
 
   // ── Detail rows ─────────────────────────────────────────────────────────────
   const rows: [string, string][] = [
-    ["Employee Code", `EES-${guard.guardId || "N/A"}`],
+    ["Name", `${guard.firstName} ${guard.lastName}`],
+    ["Phone", guard.contactNumber || "N/A"],
+    ["Emp. Code", `EES-${guard.guardId || "N/A"}`],
     ["D.O.B", guard.dateOfBirth ? fmtDate(new Date(guard.dateOfBirth)) : "N/A"],
-    ["Joining Date", fmtDate(new Date(guard.joiningDate))],
+    ["Joined", fmtDate(new Date(guard.joiningDate))],
     ["Valid Upto", fmtDate(getValidUntil(guard))],
   ];
 
-  let rowY = oy + 19;
+  let rowY = oy + 17;
   rows.forEach(([label, value]) => {
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(5.5);
     p.text(MID);
     pdf.text(label, ox + 25, rowY);
-    pdf.text(":", ox + 43.5, rowY);
+    pdf.text(":", ox + 41, rowY);
     pdf.setFont("helvetica", "bold");
     p.text(DARK);
-    pdf.text(value, ox + 45.5, rowY);
-    rowY += 4.5;
+    pdf.text(value, ox + 43, rowY);
+    rowY += 4.2;
   });
 
-  // ── Bottom name strip ────────────────────────────────────────────────────────
-  p.rect(ox, oy + CH - 9, CW, 9, BLUE_RGB);
-
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(7.5);
-  p.text(WHITE);
-  pdf.text(`${guard.firstName.toUpperCase()} ${guard.lastName.toUpperCase()}`, ox + 3, oy + CH - 4.5);
+  // ── Bottom designation strip ────────────────────────────────────────────────────────
+  p.rect(ox, oy + CH - 6.5, CW, 6.5, BLUE_RGB);
 
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(5);
-  p.text([200, 210, 225]);
-  pdf.text("DESIGNATION : SECURITY GUARD", ox + 3, oy + CH - 1.5);
+  pdf.setFontSize(5.5);
+  p.text(WHITE);
+  pdf.text("DESIGNATION : SECURITY GUARD", ox + 3, oy + CH - 2.5);
 
   if (guard.gender) {
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(5.5);
     p.text([200, 210, 225]);
-    pdf.text(guard.gender.toUpperCase(), ox + CW - 3, oy + CH - 3.5, { align: "right" });
+    pdf.text(guard.gender.toUpperCase(), ox + CW - 3, oy + CH - 2.5, { align: "right" });
   }
 };
 
@@ -238,7 +235,6 @@ const drawBack = async (pdf: jsPDF, ox: number, oy: number) => {
 
   const headerH = 5;
   const rowH = 5.5;
-  const footerH = 4.5;
   const r = 1;
   let currentY = oy + 3;
 
@@ -382,9 +378,11 @@ export const IDCardFront: React.FC<IDCardFrontProps> = ({ guard, cardRef }) => {
   const validUntil = getValidUntil(guard);
 
   const rows: [string, string][] = [
-    ["Employee Code", `EES-${guard.guardId || "N/A"}`],
+    ["Name", `${guard.firstName} ${guard.lastName}`],
+    ["Phone", guard.contactNumber || "N/A"],
+    ["Emp. Code", `EES-${guard.guardId || "N/A"}`],
     ["D.O.B", guard.dateOfBirth ? fmtDate(new Date(guard.dateOfBirth)) : "N/A"],
-    ["Joining Date", fmtDate(joiningDate)],
+    ["Joined", fmtDate(joiningDate)],
     ["Valid Upto", fmtDate(validUntil)],
   ];
 
@@ -404,22 +402,19 @@ export const IDCardFront: React.FC<IDCardFrontProps> = ({ guard, cardRef }) => {
         <div style={{ width: "72px", height: "90px", border: `2px solid ${RED}`, borderRadius: "5px", overflow: "hidden", flexShrink: 0, backgroundColor: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center" }}>
           {guard.photo ? <img src={guard.photo} alt="guard" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <User style={{ width: "32px", height: "32px", color: "#9ca3af" }} />}
         </div>
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "5px" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "3px" }}>
           {rows.map(([label, value]) => (
             <div key={label} style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
-              <span style={{ fontSize: "9px", color: "#374151", fontWeight: "600", minWidth: "82px" }}>{label}</span>
+              <span style={{ fontSize: "9px", color: "#374151", fontWeight: "600", minWidth: "70px" }}>{label}</span>
               <span style={{ fontSize: "9px", color: "#374151" }}>:</span>
               <span style={{ fontSize: "9px", color: "#111827", fontWeight: "700" }}>{value}</span>
             </div>
           ))}
         </div>
       </div>
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: BLUE, padding: "5px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <div style={{ fontSize: "11px", fontWeight: "900", color: "#fff", textTransform: "uppercase", letterSpacing: "0.5px" }}>{guard.firstName} {guard.lastName}</div>
-          <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.85)", letterSpacing: "0.5px" }}>DESIGNATION : SECURITY GUARD</div>
-        </div>
-        {guard.gender && <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.85)", fontWeight: "600" }}>{guard.gender.toUpperCase()}</div>}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: BLUE, padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ fontSize: "9px", color: "#fff", letterSpacing: "0.5px" }}>DESIGNATION : {guard?.designation || 'Not Provided'}</div>
+        {guard.gender && <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.85)", fontWeight: "600" }}>{guard.gender.toUpperCase()}</div>}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiService from "../../services/api";
+import { Designation } from "../../constants/designation.constants";
 
 export interface Guard {
   _id?: string;
@@ -14,6 +15,7 @@ export interface Guard {
   presentAddress?: string;
   permanentAddress?: string;
   bankName?: string;
+  designation: Designation;
   accountNumber?: string;
   ifscCode?: string;
   branchName?: string;

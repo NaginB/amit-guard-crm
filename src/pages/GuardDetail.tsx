@@ -186,6 +186,7 @@ export const GuardDetail: React.FC = () => {
           <Field label="Date of Birth" value={fmt(currentGuard.dateOfBirth)} />
           <Field label="Father's Name" value={(currentGuard as any).fatherName || "Not provided"} />
           <Field label="Mother's Name" value={(currentGuard as any).motherName || "Not provided"} />
+          <Field label="Designation" value={(currentGuard as any).designation || "Not provided"} />
         </SectionCard>
 
         {/* Contact Information */}
