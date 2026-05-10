@@ -473,7 +473,7 @@ export const GuardIDCardSection: React.FC<GuardIDCardSectionProps> = ({ guard })
       toast.loading("Generating PDF...", { id: "pdf-download" });
 
       // Landscape A4: 297mm × 210mm
-      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4", compress: true });
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
       const pageW = pdf.internal.pageSize.getWidth(); // 297 
 
       // Place both cards side-by-side at the top with a margin
