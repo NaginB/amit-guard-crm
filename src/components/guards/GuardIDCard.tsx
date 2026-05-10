@@ -376,7 +376,7 @@ export const IDCardFront: React.FC<IDCardFrontProps> = ({ guard, cardRef }) => {
   ];
 
   return (
-    <div ref={cardRef} style={{ width: "340px", height: "210px", backgroundColor: "#ffffff", borderRadius: "10px", overflow: "hidden", position: "relative", fontFamily: "Arial, sans-serif", boxShadow: "0 4px 16px rgba(0,0,0,0.18)", border: "1px solid #e5e7eb" }}>
+    <div ref={cardRef} style={{ width: "340px", height: "225px", backgroundColor: "#ffffff", borderRadius: "10px", overflow: "hidden", position: "relative", fontFamily: "Arial, sans-serif", boxShadow: "0 4px 16px rgba(0,0,0,0.18)", border: "1px solid #e5e7eb" }}>
       <div style={{ backgroundColor: BLUE, height: "6px", width: "100%" }} />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px 4px" }}>
         <CompanyTitle />
@@ -411,7 +411,7 @@ interface IDCardBackProps {
 }
 
 export const IDCardBack: React.FC<IDCardBackProps> = ({ backRef }) => (
-  <div ref={backRef} style={{ width: "340px", height: "210px", backgroundColor: "#ffffff", borderRadius: "10px", overflow: "hidden", position: "relative", fontFamily: "Arial, sans-serif", boxShadow: "0 4px 16px rgba(0,0,0,0.18)", border: "1px solid #e5e7eb" }}>
+  <div ref={backRef} style={{ width: "340px", height: "225px", backgroundColor: "#ffffff", borderRadius: "10px", overflow: "hidden", position: "relative", fontFamily: "Arial, sans-serif", boxShadow: "0 4px 16px rgba(0,0,0,0.18)", border: "1px solid #e5e7eb" }}>
     <div style={{ backgroundColor: BLUE, height: "6px", width: "100%" }} />
     <div style={{ position: "absolute", right: "-30px", top: 0, width: "100px", height: "210px", backgroundColor: BLUE, transform: "skewX(-8deg)", opacity: 0.06 }} />
     <div style={{ padding: "10px 14px", display: "flex", gap: "10px" }}>

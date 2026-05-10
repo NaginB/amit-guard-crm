@@ -14,6 +14,7 @@ import { fetchCurrentUser, logout } from "./features/auth/authSlice";
 import type { RouteConfig } from "./route.config";
 import { DashboardLayout } from "./components/layouts/DashboardLayout";
 import { GuardLayout } from "./components/layouts/GuardLayout";
+import "./App.css" 
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
