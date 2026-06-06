@@ -80,9 +80,8 @@ export const GuardForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
   const { currentGuard, loading, createLoading, updateLoading } = useSelector(
-    (state: RootState) => state.guards
+    (state: RootState) => state.guards,
   );
-
 
   const [children, setChildren] = useState<Child[]>([]);
   const [childErrors, setChildErrors] = useState<
@@ -91,7 +90,6 @@ export const GuardForm: React.FC = () => {
   const [uploadedImagePublicIds, setUploadedImagePublicIds] = useState<
     string[]
   >([]);
-
 
   const isEditMode = !!id;
 
@@ -184,7 +182,6 @@ export const GuardForm: React.FC = () => {
           : "",
       });
       setChildren((currentGuard as Guard).children || []);
-
     }
   }, [currentGuard, isEditMode, reset]);
 
@@ -202,14 +199,12 @@ export const GuardForm: React.FC = () => {
   const updateChild = (
     index: number,
     field: keyof Child,
-    value: string | number | undefined
+    value: string | number | undefined,
   ) => {
     const updatedChildren = [...children];
     updatedChildren[index] = { ...updatedChildren[index], [field]: value };
     setChildren(updatedChildren);
   };
-
-
 
   const handleCancel = async () => {
     // Close any open modals or dialogs
@@ -219,7 +214,7 @@ export const GuardForm: React.FC = () => {
     if (uploadedImagePublicIds.length > 0 && !isEditMode) {
       try {
         await Promise.all(
-          uploadedImagePublicIds.map((id) => apiService.deleteUpload(id))
+          uploadedImagePublicIds.map((id) => apiService.deleteUpload(id)),
         );
       } catch (error) {
         console.warn("Failed to delete uploaded images:", error);
@@ -230,7 +225,10 @@ export const GuardForm: React.FC = () => {
   };
 
   const validateChildren = () => {
-    const errors: Record<number, { name?: string; age?: string; gender?: string }> = {};
+    const errors: Record<
+      number,
+      { name?: string; age?: string; gender?: string }
+    > = {};
     children.forEach((child, index) => {
       const fieldErrors: { name?: string; age?: string; gender?: string } = {};
       if (!child.name.trim()) {
@@ -270,8 +268,6 @@ export const GuardForm: React.FC = () => {
     if (children.length > 0) {
       guardData.children = children;
     }
-
-
 
     try {
       if (isEditMode && id) {
@@ -365,7 +361,7 @@ export const GuardForm: React.FC = () => {
                     watch("photoPublicId") !== undefined
                       ? watch("photoPublicId") || undefined
                       : (currentGuard as Guard | null)?.photoPublicId ||
-                      undefined
+                        undefined
                   }
                   onChange={(url, publicId) => {
                     setValue("photo", url, { shouldValidate: true });
@@ -390,10 +386,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="John"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.firstName
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.firstName
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("firstName", {
                     required: "First name is required",
                   })}
@@ -411,10 +408,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Doe"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.lastName
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.lastName
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("lastName", {
                     required: "Last name is required",
                   })}
@@ -432,10 +430,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="date"
                   placeholder="1990-01-01"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.dateOfBirth
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.dateOfBirth
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("dateOfBirth", {
                     required: "Date of birth is required",
                     validate: (value) => {
@@ -444,14 +443,17 @@ export const GuardForm: React.FC = () => {
                       const dob = new Date(value);
                       let age = today.getFullYear() - dob.getFullYear();
                       const m = today.getMonth() - dob.getMonth();
-                      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                      if (
+                        m < 0 ||
+                        (m === 0 && today.getDate() < dob.getDate())
+                      ) {
                         age--;
                       }
                       if (age < 20 || age > 50) {
                         return "Guard age must be between 20 and 50";
                       }
                       return true;
-                    }
+                    },
                   })}
                 />
                 {errors.dateOfBirth && (
@@ -479,7 +481,7 @@ export const GuardForm: React.FC = () => {
                 <Dropdown
                   options={[
                     { value: "Male", label: "Male" },
-                    { value: "Female", label: "Female" }
+                    { value: "Female", label: "Female" },
                   ]}
                   value={watch("gender") || ""}
                   onChange={(value) =>
@@ -514,7 +516,10 @@ export const GuardForm: React.FC = () => {
                   Designation *
                 </label>
                 <Dropdown
-                  options={Object.values(Designation).map(value => ({ value, label: value }))}
+                  options={Object.values(Designation).map((value) => ({
+                    value,
+                    label: value,
+                  }))}
                   value={watch("designation") || ""}
                   onChange={(value) =>
                     setValue("designation", value as Designation, {
@@ -562,10 +567,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="tel"
                   placeholder="9876543210"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.contactNumber
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.contactNumber
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("contactNumber", {
                     required: "Contact number is required",
                     pattern: {
@@ -614,10 +620,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="date"
                   placeholder="2025-01-01"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.joiningDate
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.joiningDate
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("joiningDate", {
                     required: "Joining date is required",
                   })}
@@ -665,8 +672,6 @@ export const GuardForm: React.FC = () => {
           </div>
         </Card>
 
-
-
         {/* Address Information */}
         <Card>
           <div className="p-6">
@@ -682,10 +687,11 @@ export const GuardForm: React.FC = () => {
                 <textarea
                   rows={3}
                   placeholder="123 Main St, Springfield, IL"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.presentAddress
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.presentAddress
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("presentAddress", {
                     required: "Present address is required",
                   })}
@@ -703,10 +709,11 @@ export const GuardForm: React.FC = () => {
                 <textarea
                   rows={3}
                   placeholder="456 Elm St, Springfield, IL"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.permanentAddress
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.permanentAddress
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("permanentAddress", {
                     required: "Permanent address is required",
                   })}
@@ -736,10 +743,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="XXXX-XXXX-XXXX-XXXX"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.aadharNumber
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.aadharNumber
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("aadharNumber", {
                     required: "Aadhaar number is required",
                     pattern: {
@@ -767,10 +775,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="ABCDE1234F"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.panNumber
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.panNumber
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("panNumber", {
                     pattern: {
                       value: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i,
@@ -787,23 +796,46 @@ export const GuardForm: React.FC = () => {
               <div className="sm:col-span-2 mt-4 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Aadhaar Card Front *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Aadhaar Card Front *
+                    </label>
                     <input
                       type="hidden"
                       {...register("aadharCardFront", {
                         required: "Aadhaar card front image is required",
                       })}
                     />
-                    <input type="hidden" {...register("aadharCardFrontPublicId")} />
+                    <input
+                      type="hidden"
+                      {...register("aadharCardFrontPublicId")}
+                    />
                     <FileUpload
                       label="Upload Aadhaar Front"
                       accept="image/*"
-                      value={watch("aadharCardFront") !== undefined ? watch("aadharCardFront") || undefined : (currentGuard as Guard | null)?.aadharCardFront || undefined}
-                      imagePublicId={watch("aadharCardFrontPublicId") !== undefined ? watch("aadharCardFrontPublicId") || undefined : (currentGuard as Guard | null)?.aadharCardFrontPublicId || undefined}
+                      value={
+                        watch("aadharCardFront") !== undefined
+                          ? watch("aadharCardFront") || undefined
+                          : (currentGuard as Guard | null)?.aadharCardFront ||
+                            undefined
+                      }
+                      imagePublicId={
+                        watch("aadharCardFrontPublicId") !== undefined
+                          ? watch("aadharCardFrontPublicId") || undefined
+                          : (currentGuard as Guard | null)
+                              ?.aadharCardFrontPublicId || undefined
+                      }
                       onChange={(url, publicId) => {
-                        setValue("aadharCardFront", url, { shouldValidate: true });
-                        setValue("aadharCardFrontPublicId", publicId || "", { shouldValidate: true });
-                        if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
+                        setValue("aadharCardFront", url, {
+                          shouldValidate: true,
+                        });
+                        setValue("aadharCardFrontPublicId", publicId || "", {
+                          shouldValidate: true,
+                        });
+                        if (publicId)
+                          setUploadedImagePublicIds((prev) => [
+                            ...prev,
+                            publicId,
+                          ]);
                       }}
                     />
                     {errors.aadharCardFront && (
@@ -813,23 +845,46 @@ export const GuardForm: React.FC = () => {
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Aadhaar Card Back *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Aadhaar Card Back *
+                    </label>
                     <input
                       type="hidden"
                       {...register("aadharCardBack", {
                         required: "Aadhaar card back image is required",
                       })}
                     />
-                    <input type="hidden" {...register("aadharCardBackPublicId")} />
+                    <input
+                      type="hidden"
+                      {...register("aadharCardBackPublicId")}
+                    />
                     <FileUpload
                       label="Upload Aadhaar Back"
                       accept="image/*"
-                      value={watch("aadharCardBack") !== undefined ? watch("aadharCardBack") || undefined : (currentGuard as Guard | null)?.aadharCardBack || undefined}
-                      imagePublicId={watch("aadharCardBackPublicId") !== undefined ? watch("aadharCardBackPublicId") || undefined : (currentGuard as Guard | null)?.aadharCardBackPublicId || undefined}
+                      value={
+                        watch("aadharCardBack") !== undefined
+                          ? watch("aadharCardBack") || undefined
+                          : (currentGuard as Guard | null)?.aadharCardBack ||
+                            undefined
+                      }
+                      imagePublicId={
+                        watch("aadharCardBackPublicId") !== undefined
+                          ? watch("aadharCardBackPublicId") || undefined
+                          : (currentGuard as Guard | null)
+                              ?.aadharCardBackPublicId || undefined
+                      }
                       onChange={(url, publicId) => {
-                        setValue("aadharCardBack", url, { shouldValidate: true });
-                        setValue("aadharCardBackPublicId", publicId || "", { shouldValidate: true });
-                        if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
+                        setValue("aadharCardBack", url, {
+                          shouldValidate: true,
+                        });
+                        setValue("aadharCardBackPublicId", publicId || "", {
+                          shouldValidate: true,
+                        });
+                        if (publicId)
+                          setUploadedImagePublicIds((prev) => [
+                            ...prev,
+                            publicId,
+                          ]);
                       }}
                     />
                     {errors.aadharCardBack && (
@@ -841,34 +896,73 @@ export const GuardForm: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">PAN Card Front</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      PAN Card Front
+                    </label>
                     <input type="hidden" {...register("panCardFront")} />
-                    <input type="hidden" {...register("panCardFrontPublicId")} />
+                    <input
+                      type="hidden"
+                      {...register("panCardFrontPublicId")}
+                    />
                     <FileUpload
                       label="Upload PAN Front"
                       accept="image/*"
-                      value={watch("panCardFront") !== undefined ? watch("panCardFront") || undefined : (currentGuard as Guard | null)?.panCardFront || undefined}
-                      imagePublicId={watch("panCardFrontPublicId") !== undefined ? watch("panCardFrontPublicId") || undefined : (currentGuard as Guard | null)?.panCardFrontPublicId || undefined}
+                      value={
+                        watch("panCardFront") !== undefined
+                          ? watch("panCardFront") || undefined
+                          : (currentGuard as Guard | null)?.panCardFront ||
+                            undefined
+                      }
+                      imagePublicId={
+                        watch("panCardFrontPublicId") !== undefined
+                          ? watch("panCardFrontPublicId") || undefined
+                          : (currentGuard as Guard | null)
+                              ?.panCardFrontPublicId || undefined
+                      }
                       onChange={(url, publicId) => {
                         setValue("panCardFront", url, { shouldValidate: true });
-                        setValue("panCardFrontPublicId", publicId || "", { shouldValidate: true });
-                        if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
+                        setValue("panCardFrontPublicId", publicId || "", {
+                          shouldValidate: true,
+                        });
+                        if (publicId)
+                          setUploadedImagePublicIds((prev) => [
+                            ...prev,
+                            publicId,
+                          ]);
                       }}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">PAN Card Back</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      PAN Card Back
+                    </label>
                     <input type="hidden" {...register("panCardBack")} />
                     <input type="hidden" {...register("panCardBackPublicId")} />
                     <FileUpload
                       label="Upload PAN Back"
                       accept="image/*"
-                      value={watch("panCardBack") !== undefined ? watch("panCardBack") || undefined : (currentGuard as Guard | null)?.panCardBack || undefined}
-                      imagePublicId={watch("panCardBackPublicId") !== undefined ? watch("panCardBackPublicId") || undefined : (currentGuard as Guard | null)?.panCardBackPublicId || undefined}
+                      value={
+                        watch("panCardBack") !== undefined
+                          ? watch("panCardBack") || undefined
+                          : (currentGuard as Guard | null)?.panCardBack ||
+                            undefined
+                      }
+                      imagePublicId={
+                        watch("panCardBackPublicId") !== undefined
+                          ? watch("panCardBackPublicId") || undefined
+                          : (currentGuard as Guard | null)
+                              ?.panCardBackPublicId || undefined
+                      }
                       onChange={(url, publicId) => {
                         setValue("panCardBack", url, { shouldValidate: true });
-                        setValue("panCardBackPublicId", publicId || "", { shouldValidate: true });
-                        if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
+                        setValue("panCardBackPublicId", publicId || "", {
+                          shouldValidate: true,
+                        });
+                        if (publicId)
+                          setUploadedImagePublicIds((prev) => [
+                            ...prev,
+                            publicId,
+                          ]);
                       }}
                     />
                   </div>
@@ -893,10 +987,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Robert Doe"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.fatherName
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.fatherName
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("fatherName", {
                     required: "Father's name is required",
                   })}
@@ -914,10 +1009,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Jane Doe"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.motherName
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.motherName
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("motherName", {
                     required: "Mother's name is required",
                   })}
@@ -939,10 +1035,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Alice Doe"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.emergencyContactName
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.emergencyContactName
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("emergencyContactName", {
                     required: "Emergency contact name is required",
                   })}
@@ -960,10 +1057,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="tel"
                   placeholder="9000000000"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.emergencyContactNumber
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.emergencyContactNumber
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("emergencyContactNumber", {
                     required: "Emergency contact number is required",
                     pattern: {
@@ -985,10 +1083,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Spouse"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.emergencyContactRelation
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.emergencyContactRelation
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("emergencyContactRelation", {
                     required: "Emergency contact relationship is required",
                   })}
@@ -1018,7 +1117,10 @@ export const GuardForm: React.FC = () => {
                 </Button>
               </div>
               {children.map((child, index) => (
-                <div key={index} className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-3">
+                <div
+                  key={index}
+                  className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-3"
+                >
                   {/* Card header with index and delete button */}
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -1058,10 +1160,11 @@ export const GuardForm: React.FC = () => {
                             });
                           }
                         }}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${childErrors[index]?.name
-                          ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                          }`}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                          childErrors[index]?.name
+                            ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                            : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        }`}
                       />
                       {childErrors[index]?.name && (
                         <p className="mt-1 text-sm text-red-600">
@@ -1101,10 +1204,11 @@ export const GuardForm: React.FC = () => {
                             return updated;
                           });
                         }}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${childErrors[index]?.age
-                          ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                          }`}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                          childErrors[index]?.age
+                            ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                            : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        }`}
                       />
                       {childErrors[index]?.age && (
                         <p className="mt-1 text-sm text-red-600">
@@ -1146,7 +1250,7 @@ export const GuardForm: React.FC = () => {
                           updateChild(
                             index,
                             "gender",
-                            value as "Male" | "Female"
+                            value as "Male" | "Female",
                           );
                           setChildErrors((prev) => {
                             const updated = { ...prev };
@@ -1194,10 +1298,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="HDFC Bank"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.bankName
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.bankName
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("bankName")}
                 />
                 {errors.bankName && (
@@ -1213,10 +1318,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="123456789012"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.accountNumber
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.accountNumber
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("accountNumber")}
                 />
                 {errors.accountNumber && (
@@ -1232,10 +1338,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="HDFC0001234"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.ifscCode
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.ifscCode
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("ifscCode")}
                 />
                 {errors.ifscCode && (
@@ -1251,10 +1358,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Andheri West"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.branchName
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.branchName
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("branchName")}
                 />
                 {errors.branchName && (
@@ -1270,10 +1378,11 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="number"
                   placeholder="500000"
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${errors.salary
-                    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    errors.salary
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                   {...register("salary", {
                     valueAsNumber: true,
                   })}
@@ -1285,26 +1394,38 @@ export const GuardForm: React.FC = () => {
                 )}
               </div>
               <div className="sm:col-span-2 mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Bank Proof</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Bank Proof
+                </label>
                 <input type="hidden" {...register("bankProof")} />
                 <input type="hidden" {...register("bankProofPublicId")} />
                 <FileUpload
                   label="Upload Bank Proof (Passbook/Cancelled Cheque)"
                   accept="image/*"
-                  value={watch("bankProof") !== undefined ? watch("bankProof") || undefined : (currentGuard as Guard | null)?.bankProof || undefined}
-                  imagePublicId={watch("bankProofPublicId") !== undefined ? watch("bankProofPublicId") || undefined : (currentGuard as Guard | null)?.bankProofPublicId || undefined}
+                  value={
+                    watch("bankProof") !== undefined
+                      ? watch("bankProof") || undefined
+                      : (currentGuard as Guard | null)?.bankProof || undefined
+                  }
+                  imagePublicId={
+                    watch("bankProofPublicId") !== undefined
+                      ? watch("bankProofPublicId") || undefined
+                      : (currentGuard as Guard | null)?.bankProofPublicId ||
+                        undefined
+                  }
                   onChange={(url, publicId) => {
                     setValue("bankProof", url, { shouldValidate: true });
-                    setValue("bankProofPublicId", publicId || "", { shouldValidate: true });
-                    if (publicId) setUploadedImagePublicIds(prev => [...prev, publicId]);
+                    setValue("bankProofPublicId", publicId || "", {
+                      shouldValidate: true,
+                    });
+                    if (publicId)
+                      setUploadedImagePublicIds((prev) => [...prev, publicId]);
                   }}
                 />
               </div>
             </div>
           </div>
         </Card>
-
-
 
         {/* Submit Button */}
         <div className="flex justify-end space-x-4">
