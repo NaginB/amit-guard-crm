@@ -38,8 +38,8 @@ const previewFont = (basePx: number) => `${basePx * FONT_SCALE}px`;
 const CW = BASE_CW * CARD_WIDTH_SCALE;
 const PDF_TOP_MARGIN = 15;
 const PDF_CARD_GAP = 1;
-const PREVIEW_BASE_W = 340;
-const PREVIEW_BASE_H = 225;
+const PREVIEW_BASE_W = 370;
+const PREVIEW_BASE_H = 255;
 const PHOTO_PREVIEW_W = 70; // preview px width (+10 from original 65)
 const PHOTO_BASE_W = 19.6; // PDF mm width (proportional to preview)
 const PHOTO_BASE_INNER_W = 18.7; // photo image inside border
@@ -533,7 +533,7 @@ export const IDCardFront: React.FC<IDCardFrontProps> = ({ guard, cardRef }) => {
             >
               <span
                 style={{
-                  fontSize: previewFont(10),
+                  fontSize: previewFont(9),
                   color: "#374151",
                   fontWeight: "600",
                   minWidth: `${75 * sw}px`,
@@ -541,12 +541,12 @@ export const IDCardFront: React.FC<IDCardFrontProps> = ({ guard, cardRef }) => {
               >
                 {label}
               </span>
-              <span style={{ fontSize: previewFont(10), color: "#374151" }}>
+              <span style={{ fontSize: previewFont(9), color: "#374151" }}>
                 :
               </span>
               <span
                 style={{
-                  fontSize: previewFont(10),
+                  fontSize: previewFont(9),
                   color: "#111827",
                   fontWeight: "700",
                 }}
