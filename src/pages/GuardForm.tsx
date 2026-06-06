@@ -124,10 +124,13 @@ export const GuardForm: React.FC = () => {
   }
 
   const formatAadhaar = (raw: string) => {
-    const digitsOnly = raw.replace(/\D/g, "");
+    const digitsOnly = raw.replace(/\D/g, "").slice(0, 12);
     const parts = digitsOnly.match(/.{1,4}/g) || [];
-    return parts.slice(0, 4).join("-");
+    return parts.join("-");
   };
+
+  const formatPan = (raw: string) =>
+    raw.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 10);
 
   useEffect(() => {
     if (isEditMode && id) {
@@ -742,7 +745,8 @@ export const GuardForm: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  placeholder="XXXX-XXXX-XXXX-XXXX"
+                  placeholder="XXXX-XXXX-XXXX"
+                  maxLength={14}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                     errors.aadharNumber
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
@@ -750,10 +754,9 @@ export const GuardForm: React.FC = () => {
                   }`}
                   {...register("aadharNumber", {
                     required: "Aadhaar number is required",
-                    pattern: {
-                      value: /^(\d{4}-){3}\d{4}$/,
-                      message: "Aadhaar must be XXXX-XXXX-XXXX-XXXX",
-                    },
+                    validate: (value) =>
+                      (value ?? "").replace(/\D/g, "").length === 12 ||
+                      "Aadhaar must be 12 digits",
                     onChange: (e) => {
                       const formatted = formatAadhaar(e.target.value);
                       setValue("aadharNumber", formatted, {
@@ -775,15 +778,26 @@ export const GuardForm: React.FC = () => {
                 <input
                   type="text"
                   placeholder="ABCDE1234F"
+                  maxLength={10}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
                     errors.panNumber
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                       : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   }`}
                   {...register("panNumber", {
-                    pattern: {
-                      value: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i,
-                      message: "Invalid PAN format",
+                    validate: (value) => {
+                      if (!value) return true;
+                      if (value.length !== 10) return "PAN must be 10 characters";
+                      return (
+                        /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(value) ||
+                        "Invalid PAN format"
+                      );
+                    },
+                    onChange: (e) => {
+                      const formatted = formatPan(e.target.value);
+                      setValue("panNumber", formatted, {
+                        shouldValidate: true,
+                      });
                     },
                   })}
                 />
