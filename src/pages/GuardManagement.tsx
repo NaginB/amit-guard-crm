@@ -73,8 +73,8 @@ const GuardCard: React.FC<{
                 </div>
                 <span
                   className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${guardStatus === "active"
-                      ? "bg-green-100 text-green-800 border-green-200"
-                      : "bg-red-100 text-red-800 border-red-200"
+                    ? "bg-green-100 text-green-800 border-green-200"
+                    : "bg-red-100 text-red-800 border-red-200"
                     }`}
                 >
                   {guardStatus === "active" ? (
@@ -456,8 +456,8 @@ export const GuardManagement: React.FC = () => {
                 <button
                   onClick={() => setViewMode("table")}
                   className={`px-3 py-2 rounded-md transition-all duration-200 ${viewMode === "table"
-                      ? "bg-white text-blue-600 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
                     }`}
                   title="Table View"
                 >
@@ -466,8 +466,8 @@ export const GuardManagement: React.FC = () => {
                 <button
                   onClick={() => setViewMode("cards")}
                   className={`px-3 py-2 rounded-md transition-all duration-200 ${viewMode === "cards"
-                      ? "bg-white text-blue-600 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
                     }`}
                   title="Card View"
                 >
@@ -641,7 +641,7 @@ export const GuardManagement: React.FC = () => {
                           {guard.email || "No email"}
                         </td>
                         <td className="py-4 px-4 text-gray-900">
-                          {new Date(guard.joiningDate).toLocaleDateString()}
+                          {new Date(guard.joiningDate).toLocaleDateString('en-GB')}
                         </td>
                         <td className="py-4 px-4 text-gray-900">
                           {guard.salary
